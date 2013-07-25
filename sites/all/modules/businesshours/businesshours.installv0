@@ -1,0 +1,90 @@
+<?php
+
+
+/**
+ * @file
+ * businesshours installation
+ */
+
+
+/**
+ * Implementation of hook_install
+ */
+
+function businesshours_schema() {
+   $schema['shop_holiday_periods'] = array(
+    'description' => 'Holiday periods.',
+    'fields' => array(
+        'id' => array(
+          'description' => 'Primary Key.',
+          'type' => 'serial',
+          'size' => 'small',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+
+          ),
+        
+        'activated' => array(
+          'description' => 'period activation',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 1,
+          ),
+        'beginning_datetime' => array(
+          'description' => 'beginning date and time',
+          'type' => 'varchar',
+          'length' => 20,
+          'not null' => TRUE,
+          ),
+        'ending_datetime' => array(
+          'description' => 'ending date and time',
+          'type' => 'varchar',
+          'length' => 20,
+          'not null' => TRUE,
+          ),
+
+        ),
+      'primary key' => array('id'),
+
+      
+      );
+return $schema;  
+}
+
+/**
+ * Install
+ */
+function businesshours_install() {
+  drupal_install_schema('businesshours');
+  db_query('
+  CREATE TABLE `shop_open_periods` (
+    `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+    `day_num` smallint(5) unsigned NOT NULL, 
+    `activated` int(10) unsigned NOT NULL DEFAULT 1,
+    `beginning_time` TIME NOT NULL,
+    `ending_time` TIME NOT NULL,
+    `off` smallint(5) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`)
+  ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;');
+$opt='a:2:{s:10:"attributes";a:1:{s:5:"title";s:0:"";}s:5:"alter";b:1;}';
+
+  db_query("INSERT INTO `menu_links` (`menu_name`, `plid`, `link_path`, `router_path`, `link_title`, `options`, `module`, `hidden`, `external`, `has_children`, `expanded`, `weight`, `depth`, `customized`, `p1`, `p2`, `p3`, `p4`, `p5`, `p6`, `p7`, `p8`, `p9`, `updated`) VALUES
+('primary-links', 0, 'Business hours', 'Business hours', 'Business hours', '%s' , 'menu', 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)", $opt); 
+  $mlid = db_last_insert_id('menu_links', 'mlid');
+  db_query("UPDATE {menu_links} SET 
+    p1 = %d WHERE mlid = %d",
+    $mlid);
+}
+
+/*  variables
+
+*/
+/**
+ * Uninstall
+ */
+function businesshours_uninstall() {
+  drupal_uninstall_schema('businesshours');
+  db_query('DROP TABLE {shop_open_periods}');
+  db_query('DELETE FROM {menu_links} WHERE link_path = "Business hours" AND router_path = "Business hours" AND link_title = "Business hours" AND module="menu"');
+}

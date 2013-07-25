@@ -1,0 +1,213 @@
+#ui-datepicker-div 
+{ 
+border: 1px solid #dddddd; 
+background: #eeeeee url(images/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top repeat-x; 
+color: #333333;
+ }
+
+.ui-datepicker-title-row { 
+border: 1px solid #e78f08; 
+background: #f6a828 url(images/ui-bg_gloss-wave_35_f6a828_500x100.png) 50% 50% repeat-x; 
+color: #ffffff!important; 
+font-weight: bold;
+font-size:1.2em;
+
+ }
+
+table.ui-datepicker tbody td  {
+border: 1px solid #cccccc; background: #f6f6f6 url(images/ui-bg_glass_100_f6f6f6_1x400.png) 50% 50% repeat-x; font-weight: bold; color: #1c94c4;
+
+}
+table.ui-datepicker-div td{
+padding:0.1em;
+}
+
+table.ui-datepicker tbody td:hover{ 
+border: 1px solid #fbcb09; 
+background: #fdf5ce url(images/ui-bg_glass_100_fdf5ce_1x400.png) 50% 50% repeat-x; 
+font-weight: bold; 
+color: #c77405;
+ }
+table.ui-datepicker tbody td a {
+  cursor: pointer;
+    display: block;
+    padding: 0.2em 0.3em 0.2em ;
+	  width: 1.2em;
+	 font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
+	 font-size:1.2em;
+	 color: #1C94C4;
+	 background: url(images/ui-bg_glass_100_f6f6f6_1x400.png) repeat-x scroll 50% 50% #F6F6F6;
+    border: 1px solid #CCCCCC;
+	 }
+table.ui-datepicker .ui-datepicker-title-row td a {
+    color: #FFFFFF;
+}
+.ui-datepicker-header select.ui-datepicker-new-month {
+    left: 2em;
+    width: 7.5em;
+	font-size: 1.15em;
+	font-weight: bold;
+	height:1.6em;
+	color: #1C94C4;
+}
+.ui-datepicker-next a {
+    position: relative;
+	left: 2.6em;
+}
+.ui-datepicker-next a, .ui-datepicker-prev a {
+height:1.9em;
+
+}.ui-datepicker-header select.ui-datepicker-new-year {
+height: 1.6em;
+    left: 9.5em;
+    position: relative;
+    top: -1.74em;
+    width: 5em;
+	 font-size: 1.1em;
+	  font-weight: bold;
+	  color: #1C94C4;
+}
+
+/* IE6 IFRAME FIX (taken from datepicker 1.5.3 */
+.ui-datepicker-cover {
+    display: none; /*sorry for IE5*/
+    display/**/: block; /*sorry for IE5*/
+    position: absolute; /*must have*/
+    z-index: -1; /*must have*/
+    filter: mask(); /*must have*/
+    top: 204px; /*must have*/
+    left: -4px; /*must have*/
+    width: 210px; /*must have*/
+    height: 200px; /*must have*/
+}
+.ui-datepicker-cover .ui-datepicker-new-month {
+top:4px;
+}
+
+
+
+
+
+
+#calendar_pic {
+/*float:right;
+position:relative;
+left:10px;
+padding:10px; */
+border:0px;
+background-image:url(images/calendar.png);
+HEIGHT:105px;
+WIDTH:91px;
+font-family:Times New Roman, Serif;
+}
+#calendar_pic img {
+height:100px;
+width:90px;
+}
+#calendar_text_offset {
+/*margin-bottom:20px;margin-left: 12px;*/
+
+width:67px;
+position:relative;
+margin-left:-3px;
+top:-16px;
+}
+#table_calendar_text, #calendar_pic table{
+table-layout:fixed;
+WIDTH:76PX;
+    border: 1px solid #CCCCCC;
+}
+#calendar_pic table td tr{
+width:77px;
+    border: 1px solid #CCCCCC;
+}
+
+#message_table td {
+border:0px!important ;
+padding: 0.3em 0.5em;
+}
+
+
+
+#message_text{
+}
+#message_table{
+width:350px!important;
+
+}
+#table_calendar {
+float:right;
+width:91px!important;
+height:117px!important;
+background-repeat:no-repeat;
+border-top:0px!important;
+}
+#table_calendar td{
+font-size:10px;
+border: 0px!important;
+color:BLACK;
+text-align: center!important;
+vertical-align: top!important;
+
+}
+#table_calendar tbody{
+border:0px!important;
+}
+#margin_top{
+font-size:0.01em;
+}
+#clock { 
+
+color:White;
+}
+#num_day2 {
+/*text-align:center;
+
+position:relative;
+top:33px;
+top: 30px;
+margin-left: 33px;*/
+padding:0px 0px 0px 0px !important;
+
+text-align:right;
+font-weight:900;
+
+color:black!important;
+font-size:1.7em!important;
+} 
+
+
+#text_month{
+/*position:absolute;
+float:right;
+text-align:right;
+color:Maroon;
+padding:0!important;
+margin-top: -13px;*/
+font-size:10px;
+font-weight:900;
+color:Navy;
+
+}
+#text_day{
+/*position:absolute;font-size:0.7em;
+text-align:left;
+position:relative;
+padding-left:16px!important;
+top:60px;
+margin-top:-10px;*/
+font-weight:600;
+font-family:Tahoma, Sans Serif;
+font-size:12px!important;
+color:Olive;
+}
+
+#background_image {
+float:right;
+height:125px;
+}
+#text_box{
+position:relative;
+top:-153px;
+left:0px;
+}

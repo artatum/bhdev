@@ -1,0 +1,385 @@
+/* AT Timeout Styles
+ * NOTICE: This is a commercial Drupal theme. Elements of this theme including this field
+ * are licensed under a standard commercial license which does not permit redistribution. 
+ */
+
+/* HL - Left */
+.hl-l #branding {
+  float: left;
+  margin: 0 20px; 
+}
+.hl-l .region-header {
+  float: right;
+  margin: 0 10px;
+}
+.hl-l .region-header .block {
+  display: inline;
+  clear: none;
+  margin-bottom: 0;
+}
+.hl-l #logo {
+  padding: 0 20px 7px 3px;
+}
+
+/* HL - Right */
+.hl-r #branding {
+  float: right;
+  margin: 0 20px; 
+}
+.hl-r .region-header {
+  float: left;
+  margin: 0 10px;
+}
+.hl-r .region-header .block {
+  display: inline;
+  clear: none;
+  margin-bottom: 0;
+}
+.hl-r #logo {
+  float: right;
+  margin: 0 0 0 10px;
+  padding: 0 3px 7px 20px;
+}
+.hl-r #site-name,
+.hl-r #site-slogan {
+  text-align: right;
+}
+
+/* HL - Centered */
+.hl-c #branding {
+  float: none;
+  margin: auto;
+  text-align: center; 
+}
+.hl-c .region-header {
+  display: table;
+  float: none;
+  margin: 15px auto 0;
+  text-align: center;
+}
+.hl-c .region-header .block {
+  clear: none;
+  display: inline;
+  margin: auto;
+  padding: 0 0 20px !important;
+  text-align: left;
+}
+.hl-c .region-header .block-inner {
+  margin: 0 20px;
+}
+.hl-c #logo,
+.hl-c #site-name,
+.hl-c #site-slogan {
+  float: none;
+  margin: 0;
+  padding: 0 0 6px;
+  text-align: center;
+}
+
+
+/* Box shadows */
+.sc-n #page  {
+  -webkit-box-shadow:0 0 0 transparent;
+  -moz-box-shadow:0 0 0 transparent;
+  box-shadow:0 0 0 transparent;
+}
+.bs-l #page {
+  -webkit-box-shadow:0 0 10px rgba(76, 76, 76, 0.7);
+  -moz-box-shadow:0 0 10px rgba(76, 76, 76, 0.7);
+  box-shadow:0 0 10px rgba(76, 76, 76, 0.7);
+}
+.bs-d #page  {
+  -webkit-box-shadow:0 0 10px rgba(0, 0, 0, 0.9);
+  -moz-box-shadow:0 0 10px rgba(0, 0, 0, 0.9);
+  box-shadow:0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+
+/* Bullets */
+.mb-n ul.menu {
+  padding: 0;
+  margin: 0;
+} 
+.mb-n ul li.leaf,   
+.mb-n ul li.collapsed,
+.mb-n ul li.expanded {
+  list-style: none;
+  list-style-image: none;
+  margin: 0;
+  padding: 0;
+}
+.mb-ah ul.menu {
+  padding: 0 0 0 1.1em;
+  margin: 0;
+}
+.mb-ah ul li.leaf,   
+.mb-ah ul li.collapsed,
+.mb-ah ul li.expanded {
+  list-style-image: url(images/arrow-head.png);
+}
+.mb-ad ul.menu {
+  padding: 0 0 0 1.2em;
+  margin: 0;
+}
+.mb-ad ul li.leaf,   
+.mb-ad ul li.collapsed,
+.mb-ad ul li.expanded {
+  list-style-image: url(images/arrow-double.png);
+}
+.mb-ca ul.menu {
+  padding: 0 0 0 1.6em;
+  margin: 0;
+} 
+.mb-ca ul li.leaf,   
+.mb-ca ul li.collapsed,
+.mb-ca ul li.expanded {
+  list-style-image: url(images/arrow-circle.png);
+}
+.mb-fa ul.menu {
+  padding: 0 0 0 1.6em;
+  margin: 0;
+} 
+.mb-fa ul li.leaf,   
+.mb-fa ul li.collapsed,
+.mb-fa ul li.expanded {
+  list-style-image: url(images/arrow-fat.png);
+}
+.mb-sa ul.menu {
+  padding: 0 0 0 1.6em;
+  margin: 0;
+} 
+.mb-sa ul li.leaf,   
+.mb-sa ul li.collapsed,
+.mb-sa ul li.expanded {
+  list-style-image: url(images/arrow-skinny.png);
+}
+footer.book-navigation ul.menu {
+  padding-top: 5px;
+  padding-bottom: 7px;
+}
+
+
+/* Rounded corners */
+ul.links li,
+ul.primary li a,
+div.item-list ul.pager li {
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  -khtml-border-radius: 2px;
+  border-radius: 2px; 
+}
+
+input.form-submit,
+input.form-text,
+.rc-4 #main-content #search-form,
+.rc-4 #main-content .search-results,
+.rc-4 #messages-wrapper,
+.rc-4 #menu-bar-wrapper,
+.rc-4 #main-content > header,
+.rc-4 #breadcrumb .breadcrumb-wrapper,
+.rc-4 .node,
+.rc-4 .comment,
+.rc-4 .block-inner {
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -khtml-border-radius: 4px;
+  border-radius: 4px;
+}
+.rc-4 .block-title {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  border-radius: 3px;
+}
+
+div.admin-panel,
+.rc-8 #main-content #search-form,
+.rc-8 #main-content .search-results,
+.rc-8 #messages-wrapper,
+.rc-8 #menu-bar-wrapper,
+.rc-8 #main-content > header,
+.rc-8 #breadcrumb .breadcrumb-wrapper,
+.rc-8 .node,
+.rc-8 .comment,
+.rc-8 .block-inner {
+  -moz-border-radius: 8px;
+  -webkit-border-radius: 8px;
+  -khtml-border-radius: 8px;
+  border-radius: 8px;  
+}
+.rc-8 .block-title {
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  -khtml-border-radius: 6px;
+  border-radius: 6px;  
+}
+
+.rc-12 #main-content #search-form,
+.rc-12 #main-content .search-results,
+.rc-12 #messages-wrapper,
+.rc-12 #menu-bar-wrapper,
+.rc-12 #main-content > header,
+.rc-12 #breadcrumb .breadcrumb-wrapper,
+.rc-12 .node,
+.rc-12 .comment,
+.rc-12 .block-inner {
+  -moz-border-radius: 12px;
+  -webkit-border-radius: 12px;
+  -khtml-border-radius: 12px;
+  border-radius: 12px;
+}
+.rc-12 .block-title {
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -khtml-border-radius: 10px;
+  border-radius: 10px;
+}
+
+
+/* body backgrounds */
+body.bb-n {
+  background-image: none;
+}
+body.bb-b {
+  background-image: url(images/bubbles.png);
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+body.bb-sf {
+  background-image: url(images/snowflakes.png);
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+body.bb-st {
+  background-image: url(images/stars.png);
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+body.bb-sd {
+  background-image: url(images/dots-small.png);
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+body.bb-bd {
+  background-image: url(images/dots-big.png);
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+body.bb-wgp {
+  background-image: url(images/woodgrain-parket.jpg);
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+body.bb-dll {
+  background-image: url(images/diagonal-loose.png);
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+body.bb-dlt {
+  background-image: url(images/diagonal-tight.png);
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+body.bb-hs {
+  background-image: url(images/hoz-stripe.png);
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+body.bb-dp  {
+  background-image: url(images/diagonal-pattern.png);
+  background-position: 0 0;
+  background-repeat: repeat;
+}
+
+
+/* Override image alignment with short codes, 
+   its takes a lot to override the theme settings for image alignment */
+body .image-left,
+body div.image-left,
+body div.image-left .field-type-image {
+  float: left;
+  margin: 4px 15px 0 0;
+  text-align: left;
+}
+body .image-left img,
+body div.image-left img,
+body div.image-left .field-type-image img {
+  text-align: left;
+  margin: 0;
+}
+body .image-right,
+body div.image-right,
+body div.image-right .field-type-image {
+  float: right;
+  margin: 4px 0 0 15px;
+  text-align: right;
+}
+body .image-right img,
+body div.image-right img,
+body div.image-right .field-type-image img {
+  text-align: right;
+  margin: 0;
+}
+body .image-center,
+body .image-center img,
+body div.image-center,
+body div.image-center .field-type-image {
+  text-align: center;
+}
+body .image-center,
+body div.image-center,
+body div.image-center .field-type-image img{
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/* Noggin header image extra settings
+body.ni-a-tl header#header {background-position: top left;}
+body.ni-a-tr header#header {background-position: top right;}
+body.ni-a-tc header#header {background-position: top center;}
+body.ni-a-ml header#header {background-position: center left;}
+body.ni-a-mr header#header {background-position: center right;}
+body.ni-a-mc header#header {background-position: center center;}
+body.ni-a-bl header#header {background-position: bottom left;}
+body.ni-a-br header#header {background-position: bottom center;}
+body.ni-a-bc header#header {background-position: bottom right;}
+body.ni-r-r   header#header {background-repeat: repeat;}
+body.ni-r-rx header#header {background-repeat: repeat-x;}
+body.ni-r-ry header#header {background-repeat: repeat-y;}
+body.ni-r-nr header#header {background-repeat: no-repeat;}
+body.ni-w-ftw header#header {
+  -o-background-size: 100% auto;
+  -webkit-background-size: 100% auto;
+  -khtml-background-size: 100% auto;
+  -moz-background-size: 100% auto;
+  background-size: 100% auto;
+  background-origin: border-box;
+}
+*/
+
+/* If the label is set to show in theme settings the label class is added */
+#breadcrumb .breadcrumb-label {
+  font-size: 1em;
+  display: inline;
+  padding-right: 10px;
+}
+
+#breadcrumb .breadcrumb-label:after {
+  content: ":";
+}
+
+#breadcrumb ol {
+  margin: 0;
+  padding: 0;
+}
+
+#breadcrumb .with-breadcrumb-label ol {
+  display: inline;
+}
+
+#breadcrumb li {
+  list-style: none;
+  display: inline;
+}

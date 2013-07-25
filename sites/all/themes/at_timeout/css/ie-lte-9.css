@@ -1,0 +1,12 @@
+/* AT */
+ol#crumbs {
+  padding: 3px 0;
+}
+#header,
+#footer {
+  position: relative;
+  height: 1%;
+}
+#crumbs  {
+ padding-left: 10px !important;
+}

@@ -1,0 +1,15 @@
+name = Business Hours
+description = "Provide a management of opening hours and holiday for your online store."
+version = "7.x-0.3"
+core = 7.x
+package = "Shop"
+project = "businesshours"
+dependencies[] = date_popup
+files[] = businesshours.module
+files[] = businesshours.install
+files[] = dates_functions.inc
+files[] = businesshours.css
+files[] = clock.js
+
+
+configure = admin/Shop

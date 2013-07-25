@@ -1,0 +1,210 @@
+#ui-datepicker-div { 
+border: 1px solid #dddddd; 
+background: #eeeeee url(images/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top repeat-x; 
+color: #333333;
+}
+
+.ui-datepicker-title-row { 
+border: 1px solid #e78f08; 
+background: #f6a828 url(images/ui-bg_gloss-wave_35_f6a828_500x100.png) 50% 50% repeat-x; 
+color: #ffffff!important; 
+font-weight: bold;
+font-size:1.2em;
+}
+
+table.ui-datepicker tbody td  {
+border: 1px solid #cccccc; background: #f6f6f6 url(images/ui-bg_glass_100_f6f6f6_1x400.png) 50% 50% repeat-x; font-weight: bold; color: #1c94c4;
+
+}
+table.ui-datepicker-div td {
+padding:0.1em;
+}
+
+table.ui-datepicker tbody td:hover { 
+border: 1px solid #fbcb09; 
+background: #fdf5ce url(images/ui-bg_glass_100_fdf5ce_1x400.png) 50% 50% repeat-x; 
+font-weight: bold; 
+color: #c77405;
+}
+
+table.ui-datepicker tbody td a {
+cursor: pointer;
+display: block;
+padding: 0.2em 0.3em 0.2em ;
+width: 1.2em;
+font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
+font-size:1.2em;
+color: #1C94C4;
+background: url(images/ui-bg_glass_100_f6f6f6_1x400.png) repeat-x scroll 50% 50% #F6F6F6;
+border: 1px solid #CCCCCC;
+}
+
+table.ui-datepicker .ui-datepicker-title-row td a {
+color: #FFFFFF;
+}
+
+.ui-datepicker-header select.ui-datepicker-new-month {
+left: 2em;
+width: 7.5em;
+font-size: 1.15em;
+font-weight: bold;
+height:1.6em;
+color: #1C94C4;
+}
+
+.ui-datepicker-next a {
+position: relative;
+left: 2.6em;
+}
+
+.ui-datepicker-next a, .ui-datepicker-prev a {
+height:1.9em;
+}
+
+.ui-datepicker-header select.ui-datepicker-new-year {
+height: 1.6em;
+left: 9.5em;
+position: relative;
+top: -1.74em;
+width: 5em;
+font-size: 1.1em;
+font-weight: bold;
+color: #1C94C4;
+}
+
+/* IE6 IFRAME FIX (taken from datepicker 1.5.3 */
+.ui-datepicker-cover {
+    display: none; /*sorry for IE5*/
+    display/**/: block; /*sorry for IE5*/
+    position: absolute; /*must have*/
+    z-index: -1; /*must have*/
+    filter: mask(); /*must have*/
+    top: 204px; /*must have*/
+    left: -4px; /*must have*/
+    width: 210px; /*must have*/
+    height: 200px; /*must have*/
+}
+
+.ui-datepicker-cover .ui-datepicker-new-month {
+top:4px;
+}
+
+#calendar_pic {
+border:0px;
+background-image:url(images/calendar.png);
+HEIGHT:105px;
+WIDTH:91px;
+font-family:Times New Roman, Serif;
+}
+
+#calendar_pic img {
+height:100px;
+width:90px;
+}
+
+#calendar_text_offset {
+width:67px;
+position:relative;
+margin-left:-3px;
+top:-16px;
+}
+
+#message_table td {
+border:0px!important ;
+}
+
+#message_table{
+/*width:350px!important;*/
+}
+
+#table_calendar {
+/*float:right;*/
+/*width:91px!important;
+height:117px!important;*/
+background-repeat:no-repeat;
+margin-top:-3.1em;
+left:-1.3em;
+position : relative;
+}
+
+#table_calendar td {
+border: 0!important;
+font-size:10px;
+color:BLACK;
+text-align: center!important;
+vertical-align: top!important;
+background:none;
+}
+
+#margin_top {
+/*font-size:0.01em;*/
+}
+
+#clock { 
+color:White;
+}
+
+#num_day2 {
+position : relative;
+padding:0px 0px 0px 0px !important;
+text-align:right;
+font-weight:900;
+color:black!important;
+font-size:2em!important;
+margin-top:-0.3em;
+left:-1.5em;
+margin-bottom: 0.16em;
+} 
+#clock_text 
+{
+text-align: center;
+margin-top: -0.5em;    
+font-size: 1.1em;
+}
+
+#text_month{
+font-size:1em!important;
+font-weight:900;
+color:Navy;
+
+}
+#text_day{
+font-weight:600;
+font-family:Tahoma, Sans Serif;
+}
+
+#background_image {
+float:right;
+height:125px;
+position:relative;
+top:0.9em;
+}
+#text_box{
+position:relative;
+top:-6.4em;
+left:1.4em;
+font-size:1.3em;
+font-weight:900;
+}
+tbody {
+border-top: O!important;
+}
+thead th {
+text-align: left;
+border-bottom : 1px solid!important;
+}
+tbody tr, tr.info {
+background-color:transparent!important;
+}
+.colored_day {
+color:Green;
+}
+.highlight_period_left {
+color:Green;
+/*border-bottom : solid 1px black;
+border-left : solid 1px black;
+border-top : solid 1px black;*/
+}
+.highlight_period_right {
+color:Green;
+}

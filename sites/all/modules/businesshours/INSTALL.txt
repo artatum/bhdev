@@ -1,0 +1,9 @@
+To install the datetweaks module, do the following:
+
+ 1. Download and enable the Business hours module
+ 2. Enable the dropdown timepicker, you can goto 
+     admin/settings/date_popup and set the Timepicker: to "Use default jQuery timepicker".
+
+Go to shop and add new periods of business and Holiday.
+
+	 

@@ -1,0 +1,48 @@
+/*
+ *   Important Information about this CSS File
+ *
+ * - Do not delete or rename this file, if you do not use it leave it blank (delete
+ *   everything) and the file will be skipped when you enable Production Mode in
+ *   the Global theme settings.
+ *
+ * - Read the _README file in this directory, it contains useful help and other information.
+ */
+
+header#header div#branding {
+  float: none;
+  margin: auto;
+  text-align: center; 
+}
+header#header div.region-header {
+  display: table;
+  float: none;
+  margin: 15px auto 0;
+  text-align: center;
+}
+header#header div.region-header .block {
+  clear: none;
+  display: inline;
+  margin: auto;
+  padding: 0 0 20px !important;
+  text-align: left;
+}
+header#header div.region-header .block-inner {
+  margin: 0 20px;
+}
+header#header div#logo,
+header#header h1#site-name,
+header#header h2#site-slogan {
+  float: none;
+  margin: 0;
+  padding: 0 0 6px;
+  text-align: center;
+}
+.hl-r #logo {
+  padding: 0 3px 7px 10px;
+}
+.hl-l #logo {
+  padding: 0 10px 7px 3px;
+}
+#site-name {
+  font-size: 1.8em;
+}

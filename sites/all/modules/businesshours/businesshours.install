@@ -1,0 +1,107 @@
+<?php
+
+
+/**
+ * @file
+ * businesshours installation
+ */
+
+
+/**
+ * Implementation of hook_install
+ */
+
+function businesshours_schema() {
+      $schema['shop_open_periods'] = array(
+    'description' => 'Business Hours.',
+    'fields' => array(
+        'id' => array(
+          'description' => 'Primary Key.',
+          'type' => 'serial',
+          'size' => 'small',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          ),
+        'activated' => array(
+          'description' => 'day period activation',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 1,
+          ),
+        'off' => array(
+          'description' => 'what is off ',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+          ),
+        'day_num' => array(
+          'description' => 'day number',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          ), 
+          
+        'activated' => array(
+          'description' => 'day period activation',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 1,
+          ),
+          
+        'beginning_time' => array(
+          'description' => 'beginning time',
+          'mysql_type' => 'TIME',
+          'not null' => TRUE,
+          ),
+          
+        'ending_time' => array(
+          'description' => 'ending time',
+          'mysql_type' => 'TIME',
+          'not null' => TRUE,
+          ),
+
+        ),
+      'primary key' => array('id'),
+
+      );
+  $schema['shop_holiday_periods'] = array(
+    'description' => 'Holiday periods.',
+    'fields' => array(
+        'id' => array(
+            'description' => 'Primary Key.',
+            'type' => 'serial',
+            'size' => 'small',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+        ),
+        
+        'activated' => array(
+            'description' => 'period activation',
+            'type' => 'int',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+            'default' => 1,
+          ),
+        'beginning_datetime' => array(
+            'description' => 'beginning date and time',
+            'type' => 'varchar',
+            'length' => 20,
+            'not null' => TRUE,
+          ),
+        'ending_datetime' => array(
+            'description' => 'ending date and time',
+            'type' => 'varchar',
+            'length' => 20,
+            'not null' => TRUE,
+          ),
+
+        ),
+        'primary key' => array('id'),     
+        );
+         
+return $schema;  
+}
+

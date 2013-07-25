@@ -1,0 +1,1540 @@
+<?php
+
+/**
+ * @file
+ * Provides a page displaying business hours and Holiday and a backend management for this.
+ *
+ * Useful to store owners. 
+ */
+
+/**
+ * Implementation of hook_menu() .
+ */
+function businesshours_menu() {
+    $items = array();
+    $items['Business hours'] = array(
+        'title' => 'Business hours',
+        'menu_name' => 'main-menu',
+        'description' => 'Business hours',
+        'page callback' => 'business_hours_front_page',
+        'access callback' => TRUE,
+        'access arguments' => array('access content'),
+        'type' => MENU_NORMAL_ITEM,
+        );
+    $items['admin/Shop'] = array(
+        'title' => 'Shop',
+        'description' => 'Shop settings',
+        'page callback' => 'businesshours_admin_page',
+        'access callback' => 'user_access',
+        'access arguments' => array('administer Shop'),
+        'type' => MENU_NORMAL_ITEM,
+        );
+    $items['admin/Shop/Business Hours and Holiday/Business hours'] = array(
+        'title' => 'Business hours',
+        'description' => 'manage your business hours',
+        'page callback' => 'businesshours_business_hours_page',
+        'access callback' => 'user_access',
+        'access arguments' => array('administer Shop'),
+        'type' => MENU_NORMAL_ITEM,
+        );
+    $items['admin/Shop/Business Hours and Holiday/Business hours/add'] = array(
+        'title' => 'Add a new business hours period',
+        'description' => 'Add a new business hours period',
+        'page callback' => 'drupal_get_form',
+        'access callback' => TRUE,
+        'page arguments' => array('businesshours_business_hours_add_form'),
+        'access arguments' => array('administer Shop'),
+        'type' => MENU_LOCAL_TASK,
+        );
+    $items['admin/Shop/Business Hours and Holiday/Business hours/%/edit'] = array(
+        'title' => 'Edit business hours period',
+        'description' => 'Edit business hours period',
+        'page callback' => 'drupal_get_form',
+        'access callback' => 'user_access',
+        'page arguments' => array('businesshours_business_hours_add_form', 4),
+        'access arguments' => array('administer Shop'),
+        'type' => MENU_CALLBACK,
+        );
+    $items['admin/Shop/Business Hours and Holiday/Business hours/%/delete'] = array(
+        'title' => 'Delete Holiday Period',
+        'description' => 'Shop settings',
+        'page callback' => 'drupal_get_form',
+        'access callback' => 'user_access',
+        'page arguments' => array('businesshours_business_hours_delete_confirm', 4),
+        'access arguments' => array('administer Shop'),
+        'type' => MENU_CALLBACK,
+        );
+    $items['admin/Shop/Business Hours and Holiday/Holiday'] = array(
+        'title' => 'Holiday',
+        'description' => 'Shop settings',
+        'page callback' => 'businesshours_holiday_page',
+        'access callback' => 'user_access',
+        'access arguments' => array('administer Shop'),
+        'type' => MENU_NORMAL_ITEM,
+        );
+    $items['admin/Shop/Business Hours and Holiday/Holiday/add'] = array(
+        'title' => 'Add a new Holiday Period',
+        'description' => 'Shop settings',
+        'page callback' => 'drupal_get_form',
+        'access callback' => TRUE,
+        'page arguments' => array('businesshours_holiday_add_form'),
+        'access arguments' => array('administer Shop'),
+        'type' => MENU_LOCAL_TASK,
+        );
+    $items['admin/Shop/Business Hours and Holiday/Holiday/%/edit'] = array(
+        'title' => t('Edit Holiday Period'),
+        'description' => 'Shop settings',
+        'page callback' => 'drupal_get_form',
+        'access callback' => 'user_access',
+        'page arguments' => array('businesshours_holiday_add_form', 4),
+        'access arguments' => array('administer Shop'),
+        'type' => MENU_CALLBACK,
+        );
+    $items['admin/Shop/Business Hours and Holiday/Holiday/%/delete'] = array(
+        'title' => t('Delete Holiday Period'),
+        'description' => 'Shop settings',
+        'page callback' => 'drupal_get_form',
+        'access callback' => 'user_access',
+        'page arguments' => array('businesshours_holiday_delete_confirm',4),
+        'access arguments' => array('administer Shop'),
+        'type' => MENU_CALLBACK,
+        );
+    return $items;
+}
+function businesshours_business_hours_add_form($form, $form_state, $period_id = NULL) {
+    include_once('./' . drupal_get_path('module', 'businesshours') . '/dates_functions.inc');
+    drupal_add_js(drupal_get_path('module', 'businesshours') . '/Fgelinas/include/jquery-1.5.1.min.js');
+    drupal_add_js(drupal_get_path('module', 'businesshours') . '/Fgelinas/include/jquery.ui.core.min.js');
+    drupal_add_js(drupal_get_path('module', 'businesshours') . '/Fgelinas/include/jquery.ui.widget.min.js');
+    drupal_add_js(drupal_get_path('module', 'businesshours') . '/Fgelinas/include/jquery.ui.tabs.min.js');
+    drupal_add_js(drupal_get_path('module', 'businesshours') . '/Fgelinas/include/jquery.ui.position.min.js'  );
+    drupal_add_js(drupal_get_path('module', 'businesshours') . '/Fgelinas/jquery.ui.timepicker.js');
+    drupal_add_css(drupal_get_path('module', 'businesshours') . '/Fgelinas/jquery.ui.timepicker.css');
+    drupal_add_css(drupal_get_path('module', 'businesshours') . '/Fgelinas/include/jquery-ui-1.8.14.custom.css');
+    drupal_add_css(drupal_get_path('module', 'businesshours') . '/date_popup.css');
+    $format = 'l, F j, Y H:i';
+
+    if (!empty($period_id)) {
+        $period_item = db_query("SELECT a.* FROM {shop_open_periods} AS a WHERE id= :v1", array(':v1' => $period_id));
+        $data = $period_item->fetch();
+        $form['id'] = array('#type' => 'hidden', '#value' => $data->id);
+        $title=t('Edit business hours period #');
+        drupal_set_title($title . ' ' . $data->id);
+    }
+    else {
+        drupal_set_title('Add a new business hours period');
+    }
+    
+    $code_timepicker_js="
+  $(document) .ready(function() {            
+         $('#edit-beginning-time') .timepicker({
+                    hourText: 'Heures',
+                    minuteText: 'Minutes',
+                    amPmText: ['AM', 'PM'],
+                    timeSeparator: ':',
+                    showLeadingZero: true,
+                    nowButtonText: 'Maintenant',
+                    showNowButton: true,
+                    closeButtonText: 'Fermer',
+                    showCloseButton: true,
+                    deselectButtonText: 'D&eacute;s&eacute;lectionner',
+                    showDeselectButton: true
+                });
+            $('#edit-ending-time') .timepicker({
+                    hourText: 'Heures',
+                    minuteText: 'Minutes',
+                    amPmText: ['AM', 'PM'],
+                    timeSeparator: ':',
+                    showLeadingZero: true,
+                    nowButtonText: 'Maintenant',
+                    showNowButton: true,
+                    closeButtonText: 'Fermer',
+                    showCloseButton: true,
+                    deselectButtonText: 'D&eacute;s&eacute;lectionner',
+                    showDeselectButton: true
+                });
+    })";
+    
+    //code adding timepicker on load
+    drupal_add_js($code_timepicker_js, 'inline');
+    
+    $dayslist=get_days_text();
+
+    $form['day_num'] = array(
+        '#type' => 'select',
+        '#title' => t('Day'),
+        '#description' => t('Day'),
+        '#default_value' => !empty($period_id)? $data->day_num : 0,
+        '#required' => TRUE,
+        '#options' => $dayslist,
+        '#element_validate' => array('businesshours_business_hours_add_form_day_num_validate'),
+        );
+    $form['beginning_time'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Beginning time'),
+        '#date_format' => $format,
+        '#description' => t('When you open. '),
+        '#default_value' => !empty($period_id)?format_date(strtotime($data->beginning_time), 'custom', 'H:i'):'00:00',
+        '#required' => TRUE,
+        '#size' => 10,
+        '#element_validate' => array('businesshours_business_hours_add_form_beginning_time_validate'),
+        );
+
+    $form['ending_time'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Closing time'),
+        '#date_format' => $format,
+        '#description' => t('When you close. '),
+        '#default_value' => !empty($period_id)? format_date(strtotime($data->ending_time), 'custom', 'H:i'):'23:59',
+        '#required' => TRUE,
+        '#size' => 10,
+        '#element_validate' => array('businesshours_business_hours_add_form_ending_time_validate'), 
+        );
+
+    $form['activated'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('activate this period. '),
+        '#description' => t('activate this period'),
+        '#default_value' =>  !empty($period_id)? $data->activated  :1,
+        );  
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#prefix' => '<div style="float: right; padding: 20px 0 20px 20px; font-size: 10px;">
+    <div id="floating_timepicker">    </div>
+    <span id="floating_selected_time">    </span>  </div>',
+        '#value' => t('Submit'),
+        '#suffix' => l(t('Cancel'), 'admin/Shop/Business Hours and Holiday/Business hours'),
+        );
+    return $form;
+}
+
+function businesshours_business_hours_add_form_submit($form, &$form_state) {
+    if (!empty($form_state['values']['id'])) {
+        db_query("UPDATE {shop_open_periods} SET day_num = :v1, beginning_time = :v2 , ending_time = :v3 , activated = :v4 WHERE id = :v5", array(':v1' => $form_state['values']['day_num'], ':v2' =>  format_date(strtotime($form_state['values']['beginning_time']), 'custom', 'H:i:s'), ':v3' => format_date(strtotime($form_state['values']['ending_time']), 'custom', 'H:i:s'), ':v4' => $form_state['values']['activated'], ':v5' => $form_state['values']['id']));
+    }
+    else {
+        $id = db_insert('shop_open_periods')
+            ->fields(array(
+                    'day_num'=>$form_state['values']['day_num'], 
+                    'beginning_time'=>$form_state['values']['beginning_time'], 
+                    'ending_time'=>$form_state['values']['ending_time'], 
+                    'activated'=>$form_state['values']['activated'],
+                    'off'=>0, 
+                    ))
+            ->execute();
+        $form_state['values']['id'] = $id;
+    }
+    _businesshours_add_days_off();
+    $form_state['redirect'] = 'admin/Shop/Business Hours and Holiday/Business hours';
+}
+
+function businesshours_business_hours_add_form_beginning_time_validate($element, $form_state) {
+    if (!is_valid_timeHi($form_state['values']['beginning_time'])) {
+        form_error($element, t('Beginning time must be in HH:MM format like 10:23. '));
+    }
+    //todo avoid overlapping periods
+}
+function businesshours_business_hours_add_form_day_num_validate($element, $form_state) {
+    $query= db_query("SELECT COUNT(*) AS c FROM {shop_open_periods} AS a WHERE day_num = :v1 AND off = 0 ", array(':v1' => $form_state['values']['day_num']));
+    $periods_count = $query->fetch();
+    if ($periods_count->c > 2) {
+        drupal_set_message("Only 2 periods by day are allowed");
+        form_error($element, t('Only 2 periods by day are allowed'));
+    }
+}
+
+function businesshours_business_hours_add_form_ending_time_validate($element, $form_state) {
+    if (!is_valid_timeHi($form_state['values']['ending_time'])) {
+        form_error($element, t('Ending time must be in HH:MM format like 10:23. '));
+    }
+    //todo avoid overlapping periods
+}
+
+function businesshours_perm() {
+    return array('administer Shop');
+}
+function business_hours_front_page() {
+    drupal_set_title(t('Opening Hours and Holiday'));
+    //    include_once('./' . drupal_get_path('module', 'businesshours') . '/dates_functions.inc');
+
+
+    // end building message on top of page --------------------------
+    
+    $output = _build_header();
+    $output .= _build_business_hours_table();
+    $output .= _build_holiday_table ();
+    $output .= "<br/><h6>" . t("Thank you!") . "</h6><br/>";     
+    return $output;      
+}
+
+function businesshours_business_hours_delete_confirm($form,$form_state, $period) {
+    if (empty($period)) {
+        drupal_set_message(t('There is no business hours period with that ID. '), 'error');
+        drupal_goto('admin/Shop/Business hours');
+    }
+    $holiday= db_query("SELECT a.* FROM {shop_open_periods} AS a WHERE id= :v1", array(':v1' => $period));
+    $data = $holiday->fetch();
+    $form['id'] = array('#type' => 'value', '#value' => $data->id);
+    //$form['#redirect'] = 'admin/Shop/Business hours';
+    $output = confirm_form($form, t('Are you sure you want to delete the period # %name?', array('%name' => $data->id)), 'admin/Shop/Business hours', '', t('Delete'), t('Cancel'));
+    return $output;
+}
+
+function businesshours_business_hours_delete_confirm_submit($form, &$form_state) {
+    if ($form_state['values']['confirm']) {
+        db_query("DELETE FROM {shop_open_periods} WHERE id = :v1", array(':v1' => $form_state['values']['id']));
+        drupal_set_message(t('Period deleted. '));
+        $form_state['redirect'] = 'admin/Shop/Business Hours and Holiday/Business hours';
+    }
+}
+
+function businesshours_business_hours_page() {
+    include_once('./' . drupal_get_path('module', 'businesshours') . '/dates_functions.inc');
+    $output = "";
+    $output = t('This page allow you to manage your business hours for your online store. ');
+    $output .= '<br/><br/><br/>';
+    $output = '<hr/>';
+    $output .= t('Your businness hours');
+    $output .= '<br/>';
+    $header = array(
+        array('data' => t('Period #')),
+        array('data' => t('Day')),
+        array('data' => t('Opening time')),
+        array('data' => ' '),
+        array('data' => t('Closing time')),
+        array('data' => t('Activation')),
+        t('Operations'),
+        );
+    //retrieving periods
+    $periods= db_query("SELECT a.* FROM {shop_open_periods} AS a WHERE off = :v1 ORDER BY day_num,beginning_time ", array(':v1' => 0));
+    //while ($data = db_fetch_object($periods)) { 
+    foreach ($periods as $data) {
+        $ops = array(
+            l(t('edit'), 'admin/Shop/Business Hours and Holiday/Business hours/' . $data->id . '/edit'),
+            l(t('delete'), 'admin/Shop/Business Hours and Holiday/Business hours/' . $data->id . '/delete'),
+            );
+        $rows[] = array(
+            array( 'data' => t('#') . $data->id , 'align' => 'center'), 
+            array( 'data' => t(get_days_text($data->day_num))),    
+            array('data' => format_date(strtotime($data->beginning_time), 'custom', 'H:i'), 'align' => 'center'),
+            array('data' => '&nbsp;&nbsp;  -  &nbsp;&nbsp;', 'align' => 'center'),
+            array('data' => format_date(strtotime($data->ending_time), 'custom', 'H:i'), 'align' => 'center'),
+            array('data' => $data->activated == 1 ? t('Yes') : t('No'), 'align' => 'center'),
+            implode(' ', $ops),
+            );
+    }
+    if (count($rows) == 0) {
+        $rows[] = array(
+            array('data' => t('No business hours period have been added yet. '), 'colspan' => '12')
+            );
+    }
+    $output .= '<br/>';
+    $variables['header'] = $header;
+    $variables['rows'] = $rows;
+    $output .= theme('table', $variables);
+    //$output .= theme('table', $header, $rows, array('class' => 'no-sticky'));
+    $output .= '<br/>';
+    $output .= '<br/>';
+    $output .= l(t('Add a period'), 'admin/Shop/Business Hours and Holiday/Business hours/add');
+
+    return $output;
+}
+
+function businesshours_admin_page() {
+    drupal_set_title(t('Shop management'));
+    $output = "";
+    $output = t('This page allows you to manage your shop.');
+    $output .=   '<br /> <br /> ' . l(t('Holiday'), 'admin/Shop/Business Hours and Holiday/Holiday');
+    $output .=   '<br /> ' . l(t('Business hours'), 'admin/Shop/Business Hours and Holiday/Business hours');
+    //$lolo=menu_primary_links();
+    return $output;
+}
+function businesshours_holiday_add_form($form, $form_state, $holiday_id = NULL) {
+    global $base_url;
+    $format = 'l, F j, Y H:i';
+
+    if (!empty($holiday_id)) {
+        $holiday_item = db_query("SELECT a.* FROM {shop_holiday_periods} AS a WHERE id= :iid", array (':iid' => $holiday_id));
+        $data = $holiday_item->fetch();
+        $form['id'] = array('#type' => 'hidden', '#value' => $data->id);
+        $title=t('Edit holiday period #');
+        drupal_set_title($title . ' ' . $data->id);
+    }
+    else {
+        drupal_set_title("Creating a new Holiday period");
+        $title=t('Create holiday period #');
+        
+    }
+    $form['beginning_datetime'] = array(
+        '#type' => 'date_popup',
+        '#title' => t('Beginning day'),
+        '#date_format' => $format,
+        '#description' => t('The first day off'),
+        '#default_value' => !empty($holiday_id)? $data->beginning_datetime:date('Y-m-d 00:00:00'),
+        '#required' => TRUE,
+        '#size' => 35,
+        );
+
+    $form['ending_datetime'] = array(
+        '#type' => 'date_popup',
+        '#title' => t('Finishing day'),
+        '#date_format' => $format,
+        '#description' => t('The last day off or partially closed.'),
+        '#default_value' => !empty($holiday_id)? $data->ending_datetime: date('Y-m-d 23:59:59'),
+        '#required' => TRUE,
+        '#size' => 35,  
+        );
+
+    $form['activated'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('activate this period.'),
+        '#description' => t('activate this period'),
+        '#default_value' =>  !empty($holiday_id)? $data->activated :1,
+        );
+    
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#prefix' => '<div style="float: right; padding: 20px 0 20px 20px; font-size: 10px;">
+      <div id="floating_timepicker">    </div>
+      <span id="floating_selected_time">    </span>  </div>',
+        '#value' => t('Submit'),
+        '#suffix' => l(t('Cancel'), 'admin/Shop/Business Hours and Holiday/Holiday'),
+        );
+    
+    return $form;
+}
+
+function businesshours_holiday_add_form_submit($form, &$form_state) {
+    $table = 'shop_holiday_periods';
+    $record = new stdClass();
+    if (!empty($form_state['values']['id'])) {
+        $record->beginning_datetime =  $form_state['values']['beginning_datetime'];
+        $record->ending_datetime = $form_state['values']['ending_datetime'];
+        $record->activated = $form_state['values']['activated'];
+        $record->id = $form_state['values']['id'];
+        drupal_write_record($table, $record, 'id');
+        watchdog('shop_holiday_periods', 'Updated Holiday period with id %id.', array('%id' => $record->id));
+
+        /*
+        db_query("UPDATE {shop_holiday_periods} SET beginning_datetime = '%s', ending_datetime = '%s', activated = %d WHERE id = %d", $form_state['values']['beginning_datetime'], $form_state['values']['ending_datetime'], $form_state['values']['activated'], $form_state['values']['id']);
+        */
+    }
+    else {
+        $record->beginning_datetime =  $form_state['values']['beginning_datetime'];
+        $record->ending_datetime = $form_state['values']['ending_datetime'];
+        $record->activated = $form_state['values']['activated'];
+        drupal_write_record($table, $record);
+        watchdog('shop_holiday_periods', 'Added Holliday period with id %id.', array('%id' => $record->id));
+
+        /*
+          db_query("INSERT INTO {shop_holiday_periods} (beginning_datetime, ending_datetime, activated) VALUES ('%s', '%s', %d)", $form_state['values']['beginning_datetime'], $form_state['values']['ending_datetime'], $form_state['values']['activated']);
+          
+          $form_state['values']['id'] = db_last_insert_id('shop_holiday_periods', 'id');    */
+    }
+    $form_state['redirect'] = 'admin/Shop/Business Hours and Holiday/Holiday';
+}
+
+function businesshours_holiday_page() {
+    drupal_set_title(t('Holiday'));
+    $output = "";
+    $output = t('This page allow you to manage your holiday periods for your online store.');
+    $output .= '<br/><br/><br/>';
+    $output .= '<hr/>';
+    $output .= t('Your Holiday periods');
+    $output .= '<br/>';
+    $header = array(
+        array('data' => t('Period #')),
+        //array('data' => '       '),
+        array('data' => t('From')),
+        // array('data' => '       '),
+        array('data' => t('To (incl.)')),
+        array('data' => t('Activ.')),
+        t('Operations'),
+        );
+    //retrieving periods
+    $holidays= db_query("SELECT * FROM {shop_holiday_periods}  ORDER BY beginning_datetime");
+    foreach ($holidays as $data) {
+        $ops = array(
+            l(t('edit'), 'admin/Shop/Business Hours and Holiday/Holiday/' . $data->id . '/edit'),
+            l(t('delete'), 'admin/Shop/Business Hours and Holiday/Holiday/' . $data->id . '/delete'),
+            );
+        $rows[] = array(
+            array( 'data' => t('#') . $data->id , 'align' => 'center'), 
+            // array('data' => t('from &nbsp;&nbsp;'), 'align' => 'center'),
+            array('data' => format_date(strtotime($data->beginning_datetime), 'custom', 'l, F j, Y - H:i'), 'align' => 'right'),
+            // array('data' => t('&nbsp;&nbsp;  to  &nbsp;&nbsp;'), 'align' => 'center'),
+
+            array('data' => format_date(strtotime($data->ending_datetime), 'custom', 'l, F j, Y - H:i'), 'align' => 'right'),
+            array('data' => $data->activated == 1 ? t('Yes') : t('No'), 'align' => 'center'),
+            implode(' ', $ops),
+            );
+    }
+    if (count($rows) == 0) {
+        $rows[] = array(
+            array('data' => t('No Holiday period have been added yet.'), 'colspan' => '12')
+            );
+    }
+    $output .= '<br/>';
+    $variables['header'] = $header;
+    $variables['rows'] = $rows;
+    $output .= theme('table', $variables);
+    $output .= '<br/>';
+    $output .= '<br/>';
+    $output .= l(t('Add a period'), 'admin/Shop/Business Hours and Holiday/Holiday/add');
+    return $output;
+}
+
+
+function businesshours_holiday_delete_confirm($form, $form_state, $holidays) {
+    echo("entrée");
+    if (empty($holidays)) {
+        drupal_set_message(t('There is no holiday with that ID. '), 'error');
+        drupal_goto('admin/Shop');
+    }
+    $holiday= db_query('SELECT * FROM {shop_holiday_periods} WHERE id= :iid', array(':iid'=> $holidays));
+    $data = $holiday->fetch();
+    $my_id = $data->id;
+    $form['id'] = array('#type' => 'value', '#value' => $my_id);
+    return confirm_form($form, t('Are you sure you want to delete the period # %name ?', array('%name' => $data->id)), 'admin/Shop/Business Hours and Holiday/Holiday', '', t('Delete'), t('Cancel'));
+}
+function businesshours_holiday_delete_confirm_submit($form, &$form_state) {
+    if ($form_state['values']['confirm']) {
+        db_query('DELETE FROM {shop_holiday_periods} WHERE id = :id', array(':id' => $form_state['values']['id']));
+        drupal_set_message(t('Period deleted. '));
+        $form_state['redirect'] = 'admin/Shop/Business Hours and Holiday/Holiday';
+
+    }
+}
+function _businesshours_add_days_off() {
+    /*to help displaying of days off, we need to add days with off=1, where no period exists
+    we create a ghost table `shop_closed_periods`, that we delete after display.*/
+    $count_row_added = 0;
+    /*db_query("
+    CREATE TABLE `shop_closed_periods` (
+      `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+      `activated` int(10) unsigned NOT NULL DEFAULT '1',
+      `off` smallint(5) NOT NULL DEFAULT '0',
+      `day_num` smallint(5) unsigned NOT NULL,
+      `beginning_time` time NOT NULL,
+      `ending_time` time NOT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=578 ;
+    ");*/
+    db_query("DELETE FROM {shop_open_periods} WHERE off = :v1", array(':v1' => 1));
+
+    for ($i = 0; $i <= 6; $i++) {
+        $periods= db_query("SELECT COUNT(*) AS c FROM {shop_open_periods} AS a WHERE day_num = :v1 AND activated = 1 ", array(':v1' => $i));
+        $data = $periods->fetch();
+        $day_off = $data->c == 0;
+        if ($day_off) {//add a line in  table
+            // db_query("INSERT INTO {`shop_closed_periods`} (day_num, beginning_time, ending_time, activated, off)VALUES(:v1, '00:00:00', '00:00:00', 1,1)", array ( ':v1' => $i));
+            db_query("INSERT INTO {shop_open_periods} (day_num, beginning_time, ending_time, activated, off)VALUES(:v1, '00:00:00', '00:00:00', 1,1)", array ( ':v1' => $i));
+            $count_row_added++; 
+        }
+    }
+    
+}
+
+
+
+function _are_we_in_holida() { 
+    include_once('./' . drupal_get_path('module', 'businesshours') . '/dates_functions.inc');
+    $answer = 0 ;
+    $query = db_select('shop_holiday_periods','a');
+    $query
+        ->condition('a.activated',1, '=')
+        ->fields('a');
+    $holidays = $query->execute();
+    foreach ($holidays as $holi) {
+        $begin =  strtotime($holi->beginning_datetime);
+        $end = strtotime($holi->ending_datetime);
+        $now = full_date_now();
+        if ($now > $begin && $now < $end) {
+            //yes we are on holiday---------
+            $answer = $holi->id;
+            break;
+        }
+    }//end while holiday
+    return $answer;
+}
+
+function _are_we_working_today() {
+    
+    $current_period_today = 0;
+    $counter = db_query(" SELECT COUNT(*) as c FROM {shop_open_periods} WHERE day_num = :dayno AND activated = 1 AND off = 0 ORDER BY beginning_time ASC", array(
+        ':dayno' => day_now(),
+        ));
+    $data = $counter->fetch();
+    $data->c > 0 ? $working_today = TRUE:$working_today = FALSE;  
+    if (!$working_today) {//not working today
+        return FALSE;
+    } else {
+        return TRUE;
+    }
+}
+function _are_we_open() {
+    include_once('./' . drupal_get_path('module', 'businesshours') . '/dates_functions.inc');
+    $timenow = timeHis_to_int(format_date(strtotime(date('Y-m-d H:i:s')), 'custom', 'H:i:s')); 
+    $daynow =  format_date(strtotime(date('Y-m-d H:i:s')), 'custom', 'w');
+    $yesterday = previous_day($daynow);
+    $open = 0;
+    $periods = db_query("   SELECT * FROM
+    (
+      (SELECT * FROM {shop_open_periods} where day_num= :v1 AND activated = 1 AND beginning_time > ending_time ORDER BY beginning_time DESC LIMIT 1) 
+        UNION
+      (SELECT *  FROM {shop_open_periods} WHERE day_num = :v2 AND activated = 1 AND off = 0 ORDER BY beginning_time ASC)
+    ) 
+    AS e ORDER BY day_num, beginning_time", array(':v1' => $yesterday,':v2' => $daynow)); 
+    foreach ($periods as $period) {
+        if ($period->beginning_time > $period->ending_time) {// period finishing after midnight begin > end -----------------------
+            $end=timeHis_to_int($period->ending_time) + 2400; // now  begin < end 
+        }
+        else {
+            $end=timeHis_to_int($period->ending_time);// normal period begin < end
+        } 
+        $begin=timeHis_to_int($period->beginning_time);
+        if ($period->day_num == $yesterday) {//are we into a period of yesterday ?------------------
+            if ($timenow + 2400 < $end) {          
+                /*$closing_time = format_date(strtotime($data->ending_time), 'custom', 'H:i');      
+                $message = '<div style="float:left">' . $message_image_open_html . '</div>';
+                $message .= '<div style="float:left"><br/><br/>' . $message_time_now;
+                $message .= "<br/>" . t('We are open at this time. ') . "<br/>" . t('We close at : ') . "<strong>" . $closing_time . "</strong></div><div style='clear:both;'></div>";*/
+                $open = $period->id; 
+                break;
+            }
+        }
+        if ($timenow > $begin && ($timenow < $end)) {//into a normal period begin < end
+            $open = $period->id; 
+            break;
+        }
+    }
+    return $open;
+}
+function _test_model() {
+    $holiday_period =  _are_we_in_holida();
+    $holiday_period > 0 ? $mess = "we're into holiday # " . $holiday_period: $mess = "we're NOT in holiday";
+    drupal_set_message($mess);
+    $work = _are_we_working_today();
+    $work == TRUE ? $mess = "we work today ": $mess = "we DONT work today ";
+    drupal_set_message($mess);
+    $work = _are_we_open();
+    $work == TRUE ? $mess = "we are open ": $mess = "we are closed now! ";
+    drupal_set_message($mess);
+}
+function _build_business_hours_table($view = NULL) {
+    global $base_url;
+    $message = "";
+    $period_to_bold = -1;
+    // RECOLLAGE -------------------------------------------------------------
+    $daynow =  format_date(strtotime(date('Y-m-d H:i:s')), 'custom', 'w');
+    include_once('./' . drupal_get_path('module', 'businesshours') . '/dates_functions.inc');
+    $timenow=timeHis_to_int(format_date(strtotime(date('Y-m-d H:i:s')), 'custom', 'H:i:s')); 
+    //images
+    $image_holiday_source = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/holiday.png';
+    $image_holiday_html = '<div style="max-width: 100%;height: auto;width:auto\9;text-align:center;width:100%;margin: 10px; border:0px"><img alt="" style="width:70%;height=auto; border:0px" src="' . $image_holiday_source . '" style="" /></div>';
+    $image_open_source   = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/open.png';
+    $message_image_open_html   = '<img alt="" src="' . $image_open_source . '" style="margin: 5px; margin-top:10px; padding:10px; height: 100px; width:90px ; border:0px" />';
+    $image_closed_source = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/closed.png';
+    $message_image_closed_html = '<img alt="" src="' . $image_closed_source . '" style="margin: 10px; padding:10px; height: 100px; width:90px ; border:0px" />'; 
+    
+    $message_time_now=t('It is ') . format_date(time(), 'custom', 'H:i') . '.';
+    $on_holiday = FALSE;
+    $now = strtotime(date('Y-m-d H:i:s'));
+    // building messages on content header  --------------------------
+    //                 building day related messages 
+    //                                  1- are we working today?             ---------------
+   
+    $current_period_today = 0;
+    $counter = db_query(" SELECT COUNT(*) as c FROM {shop_open_periods} WHERE day_num = :dayno AND activated = 1 AND off = 0 ORDER BY beginning_time ASC", array(
+        ':dayno' => $daynow));
+    $data = $counter->fetch();
+    $data->c > 0 ? $working_today = TRUE:$working_today = FALSE ;  
+    if (!$working_today) {//not working today  displaying "closed" image
+        $message = '<div style="float:left">' . $message_image_closed_html . '</div>';
+        $message .= "<div style='text-align:center;'><br/><br/><br/>" . t("We are cclosed on ") . " <strong>" . get_days_text($daynow) . "s.</strong></div><div style='clear:both;'></div>";
+    }
+    // ALL PERIODS from yesterday ENDING AFTER midnight UNION periods today
+    $periods = db_query("SELECT a.id AS id, a.activated AS activated, a.day_num AS day_num, a.beginning_time AS beginning_time, a.ending_time AS ending_time, a.off AS off
+    FROM shop_open_periods a
+    WHERE  (
+    (a.day_num = :v1) 
+    AND (a.activated = 1)
+    AND (a.beginning_time > a.ending_time)) OR 
+    ((a.day_num = :v2) AND (a.activated = 1) AND (a.off = 0))  ", array(':v1' => previous_day($daynow), ':v2' => $daynow));
+ /*   $query1 = db_select('shop_open_periods','a');
+$query1 
+        ->condition('a.day_num', previous_day($daynow) , '=')
+        ->condition('a.activated', 1 , '=')
+        ->condition('a.beginning_time', 'a.ending_time' , '>')
+        ->fields('a', array('id','activated','day_num','beginning_time','ending_time','off'));
+    $query2 = db_select('shop_open_periods','b');
+    $query2
+        ->condition('b.day_num', $daynow , '=')
+        ->condition('b.activated', 1 , '=')
+        ->condition('b.off', 0 , '=')
+        ->fields('b', array('id','activated','day_num','beginning_time','ending_time','off'))
+        ->orderBy('day_num, beginning_time', 'ASC');
+    $query1->union($query2, 'UNION ALL');
+    $periods = $query1->execute();*/
+    //$periods->fetch();
+    $data = "";
+    foreach ($periods as $data) {
+        if ($data->beginning_time > $data->ending_time) {// period finishing after midnight-----------------------
+            $end=timeHis_to_int($data->ending_time) + 2400;
+        }
+        else {
+            $end=timeHis_to_int($data->ending_time);
+        } 
+        $begin=timeHis_to_int($data->beginning_time);
+        
+        $number_periods_in_this_day = db_query(
+            "SELECT COUNT(*)as c FROM {shop_open_periods} WHERE day_num = :v1 ORDER BY beginning_time ASC", array(':v1' => $daynow))->fetch()->c;
+        $current_period_today++;
+        
+        if ($data->day_num == previous_day($daynow)) {
+            //are we into a period of yesterday ?------------------
+            if ($timenow + 2400 < $end) {          
+                $period_to_bold = $data->id;
+                $closing_time = format_date(strtotime($data->ending_time), 'custom', 'H:i');      
+                $message = '<div style="float:left">' . $message_image_open_html . '</div>';
+                $message .= '<div style="float:left"><br/><br/>' . $message_time_now;
+                $message .= "<br/>" . t('We are STILL open at this time. ') . "<br/>" . t('We close at : ') . "<strong>" . $closing_time . "</strong></div><div style='clear:both;'></div>";
+                break;
+            }
+        }
+        elseif ($timenow < $begin ) {//               before the period---------------------
+            $reopening_time=format_date(strtotime($data->beginning_time), 'custom', 'H:i');
+            $period_to_bold=$data->id;        
+            $message = '<div style="float:left">' . $message_image_closed_html . '</div>';
+            $message .= '<div style="float:left"><br/><br/>' . $message_time_now;
+            $message .= "<br/>" . t('We are closed at this time. ') . "<br/>" . t('We open at : ') . "<strong>" . $reopening_time . ".</strong></div><div style='clear:both;'></div>";
+            break;
+        } 
+        elseif ($timenow > $begin && $timenow < $end) {//into a period---------------------------          
+            $closing_time=format_date(strtotime($data->ending_time), 'custom', 'H:i');
+            $period_to_bold = $data->id;
+            $message = '<div style="float:left">' . $message_image_open_html . '</div>';
+            $message .= '<div ><br/><br/>' . $message_time_now;
+            $message .= '<br/>' . t('We are OPEN now. ') . '<br/>' . t('We close at : ') . '<strong>' . $closing_time . '</strong></div><div style="clear:both;"></div>';
+            break;
+        } 
+        elseif ($data->beginning_time > $data->ending_time) {// finishing after midnight ----------                                                    
+            //to manage the possibility of finishing after midnight we transform
+            // the ending time 01:45 into 0145 then 2400 + 0145 = 2545 before comparing           
+            $max_periods_of_the_day = db_query("SELECT MAX(ending_time) AS max FROM {shop_open_periods} WHERE day_num = :v1", array(':v1' => $data->day_num));
+            $data_max = $max_periods_of_the_day->fetch();
+            $max_ending_time = $data_max->max;
+            $end=format_date( $data->ending_time, 'custom', 'Hi') + 2400;
+            $begin=format_date( $data->beginning_time, 'custom', 'Hi');
+            $period_to_bold = $data->id;
+        }
+        if ($timenow > $end) {               //after period-------------------
+            $message = '<div style="float:left">' . $message_image_closed_html . '</div>';
+            $message .= '<div ><br/><br/>' . $message_time_now;
+            $message .= "<br/>" . t("We are closed at this time. ") . "</div><div style='clear:both;'></div>";
+        }
+    } //end while periods in today  
+    
+    //are we on holiday ?----------
+    $holiday_datas= db_query("SELECT a.* FROM {shop_holiday_periods} AS a WHERE activated = 1 ");
+    foreach ($holiday_datas as $holiday) {
+        if ($now > strtotime($holiday->beginning_datetime) && ($now < strtotime($holiday->ending_datetime))) {
+            //yes we are on holiday---------
+            // re-opening day ? We duplicate  the table for conveniently search the first line after the last holiday dey.
+            $ii = 0;
+            $double_table_days = array();
+            $query = db_select('shop_open_periods','a');
+            $query
+                ->condition('a.activated', 1 , '=')
+                ->condition('a.off', 0 , '=')
+                ->fields('a', array('id','activated','day_num','beginning_time','ending_time','off'))
+                ->orderBy ('day_num, beginning_time','ASC');
+            $period = $query->execute();
+            foreach($period as $periodss) {
+                $double_table_days[$ii]['id'] = $periodss->id;
+                $double_table_days[$ii]['activated'] = $periodss->activated;
+                $double_table_days[$ii]['day_num'] = $periodss->day_num;
+                $double_table_days[$ii]['beginning_time'] = $periodss->beginning_time;
+                $double_table_days[$ii]['ending_time'] = $periodss->ending_time;
+                $double_table_days[$ii]['off'] = $periodss->off;
+                $ii++;
+            }
+            $period = $query->execute();
+            foreach($period as $periodss) {
+                $double_table_days[$ii]['id'] = $periodss->id;
+                $double_table_days[$ii]['activated'] = $periodss->activated;
+                $double_table_days[$ii]['day_num'] = strval( intval($periodss->day_num) + 7);
+                $double_table_days[$ii]['beginning_time'] = $periodss->beginning_time;
+                $double_table_days[$ii]['ending_time'] = $periodss->ending_time;
+                $double_table_days[$ii]['off'] = $periodss->off;
+                $ii++;
+            }
+            $previous_day = -1;
+            $last_holy_day = format_date(strtotime($holiday->ending_datetime), 'custom', 'w');
+            foreach($double_table_days as $key=>$period_line) {                
+                if ($period_line['day_num'] > $last_holy_day) {
+                    $id_reopening_day = $period_line['id'];
+                    $reopening_time = format_date(strtotime($period_line['beginning_time']), 'custom', 'H:i');
+                    $days_between = $period_line['day_num']-$last_holy_day;
+                    $reopening_day = format_date(strtotime($holiday->ending_datetime) + (3600*24*$days_between), 'custom', 'l, F j, Y');
+                    break;
+                }       
+            }  
+            $period_to_bold = $id_reopening_day;
+            //  Holiday
+            $image_holiday_source = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/holiday.png';
+            if ($view == 'block') {
+                $image_holiday_html = '<div style="max-width: 100%;height: auto;width:auto\9;text-align:center;border:0px"><img alt="" style="width:70%;height=auto; margin:auto;border:0px" src="' . $image_holiday_source . '" /></div>';      
+                $message = ' <div >' . $image_holiday_html . '</div>';
+                $message .= "<div style='clear:both;font-size:1.3em;text-align:center;'>" . t("We are actually in Holiday. ");
+                $message .= "<br/>" . t('We re-open : ') . "<br/><strong>" . $reopening_day . "</strong> at " . $reopening_time . ".</div>";           
+                $holiday_to_bold = $holiday->id;
+                $on_holiday=TRUE;
+            } else {            
+                $image_holiday_html = '<div style="max-width: 100%;height: auto;width:auto\9;text-align:center;margin: 10px; border:0px"><img alt="" style="width:70%;height=auto; border:0px" src="' . $image_holiday_source . '" /></div>';      
+                $message = ' <div style="float:left">' . $image_holiday_html . '</div>';
+                $message .= "<div style='font-size:1.3em;text-align:center;'><br/><br/>" . t("We are actually in Holiday. ");
+                $message .= "<br/>" . t('We re-open : ') . "<br/><strong>" . $reopening_day . "</strong> at " . $reopening_time . ".</div>";           
+                $holiday_to_bold = $holiday->id;
+                $on_holiday=TRUE;
+            }
+            break;  
+        }
+    }//end while holiday
+    // FIN RECOLLAGE -----------------------------------------------------------
+   // $period_to_bold = get_opening_period_id() ;
+    $id_reopening_day_in_week = -1;
+    //$message="";
+    // are we in holiday
+    $holiday_datas= db_query("SELECT a.* FROM {shop_holiday_periods} AS a WHERE activated = 1 ");
+    $on_holiday = FALSE;
+    $now = strtotime(date('Y-m-d H:i:s'));
+
+    foreach ($holiday_datas as $holiday) {
+        if ($now > strtotime($holiday->beginning_datetime) && ($now < strtotime($holiday->ending_datetime))) {
+    $on_holiday=TRUE;break;}}
+    // for microdatas
+    $micro_day_head ='<link href="http://purl.org/goodrelations/v1#';
+    $micro_day_tail ='" itemprop="dayOfWeek" />';
+    $micro_opens_head ='<meta content="';
+    $micro_opens_tail =':00" itemprop="opens" />';
+    $micro_closes_head ='<meta content="';
+    $micro_closes_tail =':00" itemprop="closes" />';
+    
+    $daynum_today = date('w');
+    $rows ="";
+    $days_off_array = array();
+    $output = "<h3><br/>" . t("Our business hours"). " : " . "</h3>";
+    //how many columns do we need?
+    $result= db_query("
+        SELECT COUNT( * ) AS c
+        FROM {shop_open_periods} AS p WHERE p.beginning_time > '11:59:59'
+        GROUP BY day_num
+        "
+        ); 
+    $countt = $result->rowCount();
+    if ($countt > 0) { // there is at least1 period beginning after 11:59        
+        //4 columns
+        $header = array(
+            array('data' => t('Day'), 'align' => 'left'),
+            array('data' => t('Opens '), 'align' => 'left'),
+            array('data' => t('Closes'), 'align' => 'left'),
+            array('data' => t('Opens '), 'align' => 'left'),
+            array('data' => t('Closes '), 'align' => 'left'),
+            );    
+    }
+    else {
+        //2 columns
+        $header = array(
+            array('data' => t('Day'), 'align' => 'center'),
+            array('data' => t('Opens '), 'align' => 'center'),
+            array('data' => t('Closes '), 'align' => 'center'),
+            );
+    }
+    $day_index = -1;
+    $i = 0;  
+    $periodes = db_query("
+ SELECT * FROM {shop_open_periods} WHERE activated= 1  ORDER BY day_num, beginning_time 
+  ");
+    $separator='&nbsp;&nbsp;  -  &nbsp;&nbsp;';
+    $counter_period_in_this_day = 0;
+    $previous_day = -1;
+    $id_reopening_day_in_week = reopening_day();
+    foreach ($periodes as $period) {
+        $day_text_microdata = get_days_text($period->day_num); //should not be translated
+        $begg_time = format_date(strtotime($period->beginning_time), 'custom', 'H:i');
+        $endd_time = format_date(strtotime($period->ending_time), 'custom', 'H:i');
+        if ($view == 'block') {
+            $small_day = t(get_days_text($period->day_num,'block'));           
+        } else {
+            $small_day = t(get_days_text($period->day_num));
+        }
+        $small_day = t(get_days_text($period->day_num,'block'));
+        if ($period->day_num > $day_index) {
+            //new line
+            $day_index = $period->day_num;
+            if ($previous_day <> $day_index) {
+                $previous_day = $day_index;
+                $counter_period_in_this_day = 1;
+            }else{
+                $counter_period_in_this_day++;
+            }
+            if ($period->off == 1) {
+                //day OFF
+                $days_off_array[] = $period->day_num;
+                $begin_time=' &nbsp; ';
+                $end_time=' &nbsp; ';
+                $separator='&nbsp;';
+            }
+            else {
+                // day off == 0 : worked day
+                if (($period_to_bold == $period->id) || ($id_reopening_day_in_week == $period->id)) {
+                    $begin_time = $micro_opens_head . $begg_time . $micro_opens_tail  . '<strong class="highlight_period_left">' . $begg_time . '</strong>'; 
+                    $end_time = $micro_closes_head . $endd_time . $micro_closes_tail . '<strong class="highlight_period_right">' . $endd_time . '</strong>';
+                }
+                else {
+                    $begin_time = $micro_opens_head . $begg_time . $micro_opens_tail . $begg_time; 
+                    $end_time = $micro_closes_head . $endd_time . $micro_closes_tail . $endd_time;
+                };
+            }
+            
+            if (!$on_holiday) {
+                if ($daynum_today == $period->day_num) {
+                    // period = today : we BOLD Today in table
+                    $day_day= $micro_day_head . $day_text_microdata . $micro_day_tail . '<strong class="colored_day">' . $small_day . '</strong>';
+                } 
+                else { //  period <> today 
+                    $day_day= $micro_day_head . $day_text_microdata . $micro_day_tail . $small_day;
+                } 
+            }
+            if ($on_holiday && $id_reopening_day_in_week == $period->id) {
+                // IN HOLIDAY  
+                //period day = reopening day after HOliday : we bold the re-opening day
+                $day_day = $micro_day_head . $day_text_microdata . $micro_day_tail . '<strong class="colored_day">' . $small_day . '</strong>';
+            }
+            else {// period day <> reopening day
+                $day_day = $micro_day_head . $day_text_microdata . $micro_day_tail . $small_day;
+            }            
+            if ($counter_period_in_this_day > 1) {
+                $rows[$day_index] = array(
+                    array('data' => $day_day, 'align' => 'center'),
+                    array('data' => $begin_time, 'align' => 'center'),
+                    array('data' => $end_time, 'align' => 'center'),
+                    array(''),
+                    array(''),  
+                    ); 
+            }
+            else {        
+                if($begg_time > '11:59' ) {// if one single period beginning after 12:00 
+                    $rows[$day_index] = array(
+                        array('data' => $day_day, 'align' => 'center'),
+                        array(''),
+                        array(''),     
+                        array('data' => $begin_time, 'align' => 'center'),
+                        array('data' => $end_time, 'align' => 'center'),
+                        );
+                } else {// if one single period beginning before 12:00 
+                    $rows[$day_index] = array(
+                        array('data' => $day_day, 'align' => 'center'),
+                        array('data' => $begin_time, 'align' => 'center'),
+                        array('data' => $end_time, 'align' => 'center'),
+                        );
+                }
+            } 
+        }
+        //END NEW LINE
+        else {//fill out line already existing
+            if ($period_to_bold == $period->id || ($id_reopening_day_in_week == $period->id) ) {
+                $begin_time = $micro_opens_head . $begg_time . $micro_opens_tail  . '<strong class="highlight_period_left">' . $begg_time . '</strong>'; 
+                $end_time = $micro_closes_head . $endd_time . $micro_closes_tail . '<strong class="highlight_period_right">' . $endd_time . '</strong>';
+                
+            // $begin_time = '<strong class="colored_day">' . format_date(strtotime($period->beginning_time), 'custom', 'H:i') . '</strong>'; 
+               // $end_time = '<strong class="colored_day">' . format_date(strtotime($period->ending_time), 'custom', 'H:i') . '</strong>';
+            }
+            else {
+                $begin_time = $micro_opens_head . $begg_time . $micro_opens_tail . $begg_time; 
+                $end_time = $micro_closes_head . $endd_time . $micro_closes_tail . $endd_time;
+
+            // $begin_time = format_date(strtotime($period->beginning_time), 'custom', 'H:i'); 
+               // $end_time = format_date(strtotime($period->ending_time), 'custom', 'H:i');
+            }
+            $rows[$day_index][3] = array('data' => $begin_time, 'align' => 'center');
+            //$rows[$day_index][5] = array('data' => '&nbsp;&nbsp;  -  &nbsp;&nbsp;', 'align' => 'center');
+            $rows[$day_index][4] = array('data' => $end_time, 'align' => 'center');
+        }
+    }//end loop period
+    $variables['header'] = $header;
+    $variables['rows'] = $rows;
+    $header_schema_org = '<div itemprop="openingHoursSpecification" itemscope="" itemtype="http://schema.org/OpeningHoursSpecification">';
+    $footer_schema_org = "</div>";
+    $output .= theme('table', $variables);
+ $query12 = db_query("SELECT COUNT(*) AS c  FROM shop_open_periods a
+WHERE  a.off = 1");
+    $dati = $query12->fetch()->c;
+    if ($dati > 0) {
+        $output .= t("We are closed on : ") ;
+        $ii = 0;
+        foreach ($days_off_array as $valeur) {
+            $ii++;
+            if (count($days_off_array) < 2) {
+                $output .= ' <strong>' . get_days_text($valeur) . 's.</strong>';
+            } 
+            elseif ($ii == count($days_off_array)) {
+                $output .= ' <strong>' . t('and') . ' ' . get_days_text($valeur) . 's.</strong>';
+            }
+            else {
+                $output .= ' <strong>' . get_days_text($valeur) . 's,</strong>';
+            }
+        }
+    }
+    
+    $output .= '<br/>';
+    return $output;
+}
+
+function _build_holiday_table () {
+    $output = "";
+    $holidays = db_select('shop_holiday_periods','a');
+    $holidays
+        ->condition('a.activated',1, '=')
+        ->fields('a', array('id','activated','beginning_datetime','ending_datetime'))
+    ;
+    $count = $holidays->countQuery()->execute()->fetchfield();
+    if ($count > 0) {
+        $header2 = array(
+            array('data' => '       '),
+            array('data' => t('From')),
+            array('data' => '       '),
+            array('data' => t('To(included)')),
+            );
+        $holidays= db_query("SELECT a.* FROM {shop_holiday_periods} AS a where activated = 1 ORDER BY beginning_datetime;");
+        //while ($data = db_fetch_object($holidays)) {
+        foreach ($holidays as $data) {
+            $beginning = format_date(strtotime($data->beginning_datetime), 'custom', 'H:i');
+            $ending = format_date(strtotime($data->ending_datetime), 'custom', 'H:i');
+            if ($beginning > '00:00' || $ending < '23:59' ) {
+                $begin_date = format_date(strtotime($data->beginning_datetime), 'custom', 'l, F j, Y H:i');
+                $end_data = format_date(strtotime($data->ending_datetime), 'custom', 'l, F j, Y H:i');
+            }
+            else {
+                $begin_date = format_date(strtotime($data->beginning_datetime), 'custom', 'l, F j, Y');
+                $end_data = format_date(strtotime($data->ending_datetime), 'custom', 'l, F j, Y');      
+            }
+            /* if ($holiday_to_bold == $data->id) {
+                 $begin_date = '<strong class="colored_day">' . $begin_date . '</strong>';
+                 $end_data = '<strong class="colored_day">' . $end_data . '</strong>';
+             }*/
+            $rows2[] = array(
+                array('data' => t('from &nbsp;&nbsp;'), 'align' => 'center'),
+                array('data' => $begin_date, 'align' => 'center'),
+                array('data' => t('&nbsp;&nbsp;  to  &nbsp;&nbsp;'), 'align' => 'center'),
+                array('data' => $end_data, 'align' => 'center'),
+                );
+        }   
+        
+        $output = "<br/><hr><br/><h3>" . t("Our vacations :") . "</h3><br/>";
+
+        $variables['header'] = $header2;
+        $variables['rows'] = $rows2;
+        $output .= theme('table', $variables);
+    }
+    return $output;
+}
+function _build_header () {
+    global $base_url;
+    include_once('./' . drupal_get_path('module', 'businesshours') . '/dates_functions.inc');
+
+    $daynow =  format_date(strtotime(date('Y-m-d H:i:s')), 'custom', 'w');
+    $timenow=timeHis_to_int(format_date(strtotime(date('Y-m-d H:i:s')), 'custom', 'H:i:s')); 
+    
+    $output = _build_calendar();
+    //$output .= _build_frontdoor('page') ;
+    return $output;
+}
+function _build_calendar(){
+    global $base_url;
+    //code adding clock on load
+    drupal_add_js(drupal_get_path('module', 'businesshours') . '/Fgelinas/include/jquery-1.5.1.min.js');
+    drupal_add_css(drupal_get_path('module', 'businesshours') . '/businesshours.css');
+    drupal_add_js(drupal_get_path('module', 'businesshours') . '/clock.js');
+    $code_clock_on_load_js="
+    $(document) .ready(function() {            
+      updateClock(); 
+      setInterval('updateClock()', 1000 )});";
+    drupal_add_js($code_clock_on_load_js, 'inline');
+    drupal_add_css(drupal_get_path('module', 'businesshours') . '/businesshours.css');
+
+    $now_month_text = t(date('F'));
+    $now_year_text = format_date(strtotime(date('Y')), 'custom', 'Y');  
+    $now_day_text = format_date(strtotime(date('l')), 'custom', 'l');
+    $now_day_in_month_num = date('j');
+
+    $image_calendar_source = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/calendar.png';
+    $image_calendar_html= '<img alt="" height=125 width=90 src="' . $image_calendar_source . '"  />';
+    $image_calendar2 =
+        '<div id="background_image">' . $image_calendar_html . 
+        '<div id="text_box">' . $now_month_text .
+        '<div id="num_day2">' . $now_day_in_month_num . '</div>' .
+        '<table id="table_calendar" >
+       <tbody style="border-top:0">
+       <tr><td id="margin_top" style="border:0;font-size:0.9em;border-bottom:1 solid red;" >&nbsp;</td></tr> 
+       <tr ><td id="text_day">' . $now_day_text . '</td></tr> 
+       <tr ><td><div id="clock_text" ><span id="clock" style="font-size:1.2em;color:Yellow;font-weight:700">&nbsp;</span></div></td></tr> 
+       </tbody>
+       </table>
+        </div></div>';
+    $output = $image_calendar2 ;
+    return $output;
+}
+function _build_frontdoor($view) {
+    global $base_url;
+    $message = "";
+    $daynow =  format_date(strtotime(date('Y-m-d H:i:s')), 'custom', 'w');
+    include_once('./' . drupal_get_path('module', 'businesshours') . '/dates_functions.inc');
+    $timenow=timeHis_to_int(format_date(strtotime(date('Y-m-d H:i:s')), 'custom', 'H:i:s')); 
+    //images
+    $image_holiday_source = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/holiday.png';
+    $image_holiday_html = '<div style="max-width: 100%;height: auto;width:auto\9;text-align:center;width:100%;margin: 10px; border:0px"><img alt="" style="width:70%;height=auto; border:0px" src="' . $image_holiday_source . '" style="" /></div>';
+    $image_open_source   = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/open.png';
+    $message_image_open_html   = '<img alt="" src="' . $image_open_source . '" style="margin: 5px; margin-top:10px; padding:10px; height: 100px; width:90px ; border:0px" />';
+    $image_closed_source = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/closed.png';
+    $message_image_closed_html = '<img alt="" src="' . $image_closed_source . '" style="margin: 10px; padding:10px; height: 100px; width:90px ; border:0px" />'; 
+    
+    $message_time_now=t('It is ') . format_date(time(), 'custom', 'H:i') . '.';
+    $on_holiday = FALSE;
+    $now = strtotime(date('Y-m-d H:i:s'));
+    // building messages on content header  --------------------------
+    //                 building day related messages 
+    //                                  1- are we working today?             ---------------
+    $current_period_today = 0;
+    $counter = db_query(" SELECT COUNT(*) as c FROM {shop_open_periods} WHERE day_num = :dayno AND activated = 1 AND off = 0 ORDER BY beginning_time ASC", array(
+        ':dayno' => $daynow));
+    $data = $counter->fetch();
+    $data->c > 0 ? $working_today = TRUE:$working_today = FALSE ;  
+    if (!$working_today) {//not working today
+        $message = '<div style="float:left">' . $message_image_closed_html . '</div>';
+        $message .= "<div style='text-align:center;'><br/><br/><br/>" . t("We are closed on ") . " <strong>" . get_days_text($daynow) . "s.</strong></div><div style='clear:both;'></div>";
+    }
+    $query1 = db_select('shop_open_periods','a');
+    $query1
+        ->condition('a.day_num', previous_day($daynow) , '=')
+        ->condition('a.activated', 1 , '=')
+        ->condition('a.beginning_time', 'a.ending_time' , '>')
+        ->fields('a', array('id','activated','day_num','beginning_time','ending_time','off'));
+    $query2 = db_select('shop_open_periods','b');
+    $query2
+        ->condition('b.day_num', $daynow , '=')
+        ->condition('b.activated', 1 , '=')
+        ->condition('b.off', 0 , '=')
+        ->fields('b', array('id','activated','day_num','beginning_time','ending_time','off'))
+        ->orderBy('beginning_time', 'ASC');
+    $query1->union($query2, 'UNION ALL');
+    $periods = $query1->execute();
+    foreach ($periods as $data) {
+        if ($data->beginning_time > $data->ending_time) {// period finishing after midnight-----------------------
+            $end=timeHis_to_int($data->ending_time) + 2400;
+        }
+        else {
+            $end=timeHis_to_int($data->ending_time);
+        } 
+        $begin=timeHis_to_int($data->beginning_time);
+        
+        $number_periods_in_this_day = db_query(
+            "SELECT COUNT(*)as c FROM {shop_open_periods} WHERE day_num = :v1 ORDER BY beginning_time ASC", array(':v1' => $daynow))->fetch()->c;
+        $current_period_today++;
+        
+        if ($data->day_num == previous_day($daynow)) {//are we into a period of yesterday ?------------------
+            if ($timenow + 2400 < $end) {          
+                $period_to_bold = $data->id;
+                $closing_time = format_date(strtotime($data->ending_time), 'custom', 'H:i');      
+                $message = '<div style="float:left">' . $message_image_open_html . '</div>';
+                $message .= '<div style="float:left"><br/><br/>' . $message_time_now;
+                $message .= "<br/>" . t('We are STILL open at this time. ') . "<br/>" . t('We close at : ') . "<strong>" . $closing_time . "</strong></div><div style='clear:both;'></div>";
+                break;
+            }
+        }
+        elseif ($timenow < $begin ) {//               before the period---------------------
+            $reopening_time=format_date(strtotime($data->beginning_time), 'custom', 'H:i');
+            $period_to_bold=$data->id;        
+            $message = '<div style="float:left">' . $message_image_closed_html . '</div>';
+            $message .= '<div style="float:left"><br/><br/>' . $message_time_now;
+            $message .= "<br/>" . t('We are closed at this time. ') . "<br/>" . t('We open at : ') . "<strong>" . $reopening_time . ".</strong></div><div style='clear:both;'></div>";
+            break;
+        } 
+        elseif ($timenow > $begin && $timenow < $end) {//into a period---------------------------          
+            $closing_time=format_date(strtotime($data->ending_time), 'custom', 'H:i');
+            $period_to_bold = $data->id;
+            $message = '<div style="float:left">' . $message_image_open_html . '</div>';
+            $message .= '<div ><br/><br/>' . $message_time_now;
+            $message .= '<br/>' . t('We are OPEN now. ') . '<br/>' . t('We close at : ') . '<strong>' . $closing_time . '</strong></div><div style="clear:both;"></div>';
+            break;
+        } 
+        elseif ($data->beginning_time > $data->ending_time) {// finishing after midnight ----------                                                    
+            //to manage the possibility of finishing after midnight we transform
+            // the ending time 01:45 into 0145 then 2400 + 0145 = 2545 before comparing           
+            $max_periods_of_the_day = db_query("SELECT MAX(ending_time) AS max FROM {shop_open_periods} WHERE day_num = :v1", array(':v1' => $data->day_num));
+            $data_max = $max_periods_of_the_day->fetch();
+            $max_ending_time = $data_max->max;
+            $end=format_date( $data->ending_time, 'custom', 'Hi') + 2400;
+            $begin=format_date( $data->beginning_time, 'custom', 'Hi');
+            $period_to_bold = $data->id;
+        }
+        if ($timenow > $end) {               //after period-------------------
+            $message = '<div style="float:left">' . $message_image_closed_html . '</div>';
+            $message .= '<div ><br/><br/>' . $message_time_now;
+            $message .= "<br/>" . t("We are closed at this time. ") . "</div><div style='clear:both;'></div>";
+        }
+    } //end while periods in today  
+    
+    //are we on holiday ?----------
+    $holiday_datas= db_query("SELECT a.* FROM {shop_holiday_periods} AS a WHERE activated = 1 ");
+    foreach ($holiday_datas as $holiday) {
+        if ($now > strtotime($holiday->beginning_datetime) && ($now < strtotime($holiday->ending_datetime))) {
+            //yes we are on holiday---------
+            // re-opening day ? We duplicate  the table for conveniently search the first line after the last holiday dey.
+            $ii = 0;
+            $double_table_days = array();
+            $query = db_select('shop_open_periods','a');
+            $query
+                ->condition('a.activated', 1 , '=')
+                ->condition('a.off', 0 , '=')
+                ->fields('a', array('id','activated','day_num','beginning_time','ending_time','off'))
+                ->orderBy ('day_num, beginning_time','ASC');
+            $period = $query->execute();
+            foreach($period as $periodss) {
+                $double_table_days[$ii]['id'] = $periodss->id;
+                $double_table_days[$ii]['activated'] = $periodss->activated;
+                $double_table_days[$ii]['day_num'] = $periodss->day_num;
+                $double_table_days[$ii]['beginning_time'] = $periodss->beginning_time;
+                $double_table_days[$ii]['ending_time'] = $periodss->ending_time;
+                $double_table_days[$ii]['off'] = $periodss->off;
+                $ii++;
+            }
+            $period = $query->execute();
+            foreach($period as $periodss) {
+                $double_table_days[$ii]['id'] = $periodss->id;
+                $double_table_days[$ii]['activated'] = $periodss->activated;
+                $double_table_days[$ii]['day_num'] = strval( intval($periodss->day_num) + 7);
+                $double_table_days[$ii]['beginning_time'] = $periodss->beginning_time;
+                $double_table_days[$ii]['ending_time'] = $periodss->ending_time;
+                $double_table_days[$ii]['off'] = $periodss->off;
+                $ii++;
+            }
+            $previous_day = -1;
+            $last_holy_day = format_date(strtotime($holiday->ending_datetime), 'custom', 'w');
+            foreach($double_table_days as $key=>$period_line) {                
+                if ($period_line['day_num'] > $last_holy_day) {
+                    $id_reopening_day = $period_line['id'];
+                    $reopening_time = format_date(strtotime($period_line['beginning_time']), 'custom', 'H:i');
+                    $days_between = $period_line['day_num']-$last_holy_day;
+                    $reopening_day = format_date(strtotime($holiday->ending_datetime) + (3600*24*$days_between), 'custom', 'l, F j, Y');
+                    break;
+                }       
+            }  
+            $period_to_bold = $id_reopening_day;
+            //  Holiday
+            $image_holiday_source = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/holiday.png';
+            if ($view == 'block') {
+                $image_holiday_html = '<div style="max-width: 100%;height: auto;width:auto\9;text-align:center;border:0px"><img alt="" style="width:70%;height=auto; margin:auto;border:0px" src="' . $image_holiday_source . '" /></div>';      
+                $message = ' <div >' . $image_holiday_html . '</div>';
+                $message .= "<div style='clear:both;font-size:1.3em;text-align:center;'>" . t("We are actually in Holiday. ");
+                $message .= "<br/>" . t('We re-open : ') . "<br/><strong>" . $reopening_day . "</strong> at " . $reopening_time . ".</div>";           
+                $holiday_to_bold = $holiday->id;
+                $on_holiday=TRUE;
+            } else {            
+                $image_holiday_html = '<div style="max-width: 100%;height: auto;width:auto\9;text-align:center;margin: 10px; border:0px"><img alt="" style="width:70%;height=auto; border:0px" src="' . $image_holiday_source . '" /></div>';      
+                $message = ' <div style="float:left">' . $image_holiday_html . '</div>';
+                $message .= "<div style='font-size:1.3em;text-align:center;'><br/><br/>" . t("We are actually in Holiday. ");
+                $message .= "<br/>" . t('We re-open : ') . "<br/><strong>" . $reopening_day . "</strong> at " . $reopening_time . ".</div>";           
+                $holiday_to_bold = $holiday->id;
+                $on_holiday=TRUE;
+            }
+            break;  
+        }
+    }//end while holiday
+    return $message;
+}
+function businesshours_block_info() {
+    $blocks = array();
+    $blocks['frontdoor'] = array (
+        'info' => t('The Front Door'),
+        'status' => false,
+        'visibility' => 0,
+        );
+    $blocks['calendar'] = array (
+        'info' => t('Little calendar'),
+        'status' => false,
+        'visibility' => 0,
+        );
+    $blocks['hours'] = array (
+        'info' => t('Opening Hours'),
+        'status' => FALSE,
+        'visibility' => 0,
+        );
+    $blocks['holiday'] = array (
+        'info' => t('Holiday block'),
+        'status' => FALSE,
+        'visibility' => 0,
+        );
+    return $blocks;
+}
+function businesshours_block_view($delta) {
+    $block = array();
+    switch ($delta) {
+        case 'calendar':
+            $block['content'] = businesshours_block_contents($delta);
+            $block['subject'] = t('Calendar');
+            break;
+        case 'frontdoor':
+            $block['content'] = businesshours_block_contents($delta);
+            $block['subject'] = t('Front Door');
+            break;       
+        case 'hours':
+            $block['content'] = businesshours_block_contents($delta);
+            $block['subject'] = t('Opening');
+            break;
+        case 'holiday':
+            $block['content'] = businesshours_block_contents($delta);
+            $block['subject'] = t('holiday');
+            break;
+    }
+    return $block;
+
+}
+function businesshours_block_contents($delta) {
+    switch ($delta) {
+        case 'calendar':
+            return array('#markup' => '<div style="width:8.2em;margin:auto;">' . _build_calendar() . '</div>');
+            break;
+        case 'frontdoor':
+            return array('#markup' => _build_frontdoor('block'));
+            break;
+        case 'hours':
+            return array('#markup' =>  _build_business_hours_table('block'));
+            break;
+        case 'holiday':
+            return array('#markup' => _build_holiday_table ());
+            break;
+    }
+}
+
+function reopening_day() {//---------- todo -- duplication of build-front_door : not good
+    $id_reopening_day = -1;
+    $now = strtotime(date('Y-m-d H:i:s'));
+    //are we on holiday ?
+    $holiday_datas= db_query("SELECT a.* FROM {shop_holiday_periods} AS a WHERE activated = 1 ");
+    foreach ($holiday_datas as $holiday) {
+        if ($now > strtotime($holiday->beginning_datetime) && ($now < strtotime($holiday->ending_datetime))) {
+            //yes we are on holiday---------
+            // re-op ening day ? We duplicate two times the table for conveniently search the first line after the last holiday dey.
+            $ii = 0;
+            $double_table_days = array();
+            $query = db_select('shop_open_periods','a');
+            $query
+                ->condition('a.activated', 1 , '=')
+                ->condition('a.off', 0 , '=')
+                ->fields('a', array('id','activated','day_num','beginning_time','ending_time','off'))
+                ->orderBy ('day_num, beginning_time','ASC');
+            $period = $query->execute();
+            foreach($period as $periodss) {
+                $double_table_days[$ii]['id'] = $periodss->id;
+                $double_table_days[$ii]['activated'] = $periodss->activated;
+                $double_table_days[$ii]['day_num'] = $periodss->day_num;
+                $double_table_days[$ii]['beginning_time'] = $periodss->beginning_time;
+                $double_table_days[$ii]['ending_time'] = $periodss->ending_time;
+                $double_table_days[$ii]['off'] = $periodss->off;
+                $ii++;
+            }
+            $period = $query->execute();
+            foreach($period as $periodss) {
+                $double_table_days[$ii]['id'] = $periodss->id;
+                $double_table_days[$ii]['activated'] = $periodss->activated;
+                $double_table_days[$ii]['day_num'] = strval( intval($periodss->day_num) + 7);
+                $double_table_days[$ii]['beginning_time'] = $periodss->beginning_time;
+                $double_table_days[$ii]['ending_time'] = $periodss->ending_time;
+                $double_table_days[$ii]['off'] = $periodss->off;
+                $ii++;
+            }
+            $previous_day = -1;
+            $last_holy_day = format_date(strtotime($holiday->ending_datetime), 'custom', 'w');
+            foreach($double_table_days as $key=>$period_line) {                
+                if ($period_line['day_num'] > $last_holy_day) {
+                    $id_reopening_day = $period_line['id'];
+                    $reopening_time = format_date(strtotime($period_line['beginning_time']), 'custom', 'H:i');
+                    $days_between = $period_line['day_num']-$last_holy_day;
+                    $reopening_day = format_date(strtotime($holiday->ending_datetime) + (3600*24*$days_between), 'custom', 'l, F j, Y');
+                    break;
+                }       
+            } 
+        }
+    }//end while holiday
+    return $id_reopening_day;
+}
+function get_opening_period_id() {
+    global $base_url;
+    $period_to_bold = -1;
+    $daynow =  format_date(strtotime(date('Y-m-d H:i:s')), 'custom', 'w');
+    include_once('./' . drupal_get_path('module', 'businesshours') . '/dates_functions.inc');
+    $timenow=timeHis_to_int(format_date(strtotime(date('Y-m-d H:i:s')), 'custom', 'H:i:s')); 
+    //images
+    $image_holiday_source = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/holiday.png';
+    $image_holiday_html = '<div style="max-width: 100%;height: auto;width:auto\9;text-align:center;width:100%;margin: 10px; border:0px"><img alt="" style="width:70%;height=auto; border:0px" src="' . $image_holiday_source . '" style="" /></div>';
+    $image_open_source   = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/open.png';
+    $message_image_open_html   = '<img alt="" src="' . $image_open_source . '" style="margin: 5px; margin-top:10px; padding:10px; height: 100px; width:90px ; border:0px" />';
+    $image_closed_source = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/closed.png';
+    $message_image_closed_html = '<img alt="" src="' . $image_closed_source . '" style="margin: 10px; padding:10px; height: 100px; width:90px ; border:0px" />'; 
+    
+    $message_time_now=t('It is ') . format_date(time(), 'custom', 'H:i') . '.';
+    $on_holiday = FALSE;
+    $now = strtotime(date('Y-m-d H:i:s'));
+    // building messages on content header  --------------------------
+    //                 building day related messages 
+    //                                  1- are we working today?             ---------------
+    $current_period_today = 0;
+    $counter = db_query(" SELECT COUNT(*) as c FROM {shop_open_periods} WHERE day_num = :dayno AND activated = 1 AND off = 0 ORDER BY beginning_time ASC", array(
+        ':dayno' => $daynow));
+    $data = $counter->fetch();
+    $data->c > 0 ? $working_today = TRUE:$working_today = FALSE ;  
+    if (!$working_today) {//not working today
+        $message = '<div style="float:left">' . $message_image_closed_html . '</div>';
+        $message .= "<div style='text-align:center;'><br/><br/><br/>" . t("We are closed on ") . " <strong>" . get_days_text($daynow) . "s.</strong></div><div style='clear:both;'></div>";
+    }
+    $query1 = db_select('shop_open_periods','a');
+    $query1
+        ->condition('a.day_num', previous_day($daynow) , '=')
+        ->condition('a.activated', 1 , '=')
+        ->condition('a.beginning_time', 'a.ending_time' , '>')
+        ->fields('a', array('id','activated','day_num','beginning_time','ending_time','off'));
+    $query2 = db_select('shop_open_periods','b');
+    $query2
+        ->condition('b.day_num', $daynow , '=')
+        ->condition('b.activated', 1 , '=')
+        ->condition('b.off', 0 , '=')
+        ->fields('b', array('id','activated','day_num','beginning_time','ending_time','off'))
+        ->orderBy('beginning_time', 'ASC');
+    $query1->union($query2, 'UNION ALL');
+    $periods = $query1->execute();
+    foreach ($periods as $data) {
+        if ($data->beginning_time > $data->ending_time) {// period finishing after midnight-----------------------
+            $end=timeHis_to_int($data->ending_time) + 2400;
+        }
+        else {
+            $end=timeHis_to_int($data->ending_time);
+        } 
+        $begin=timeHis_to_int($data->beginning_time);
+        
+        $number_periods_in_this_day = db_query(
+            "SELECT COUNT(*)as c FROM {shop_open_periods} WHERE day_num = :v1 ORDER BY beginning_time ASC", array(':v1' => $daynow))->fetch()->c;
+        $current_period_today++;
+        
+        if ($data->day_num == previous_day($daynow)) {//are we into a period of yesterday ?------------------
+            if ($timenow + 2400 < $end) {          
+                $period_to_bold = $data->id;
+                $closing_time = format_date(strtotime($data->ending_time), 'custom', 'H:i');      
+                $message = '<div style="float:left">' . $message_image_open_html . '</div>';
+                $message .= '<div style="float:left"><br/><br/>' . $message_time_now;
+                $message .= "<br/>" . t('We are STILL open at this time. ') . "<br/>" . t('We close at : ') . "<strong>" . $closing_time . "</strong></div><div style='clear:both;'></div>";
+                break;
+            }
+        }
+        elseif ($timenow < $begin ) {//               before the period---------------------
+            $reopening_time=format_date(strtotime($data->beginning_time), 'custom', 'H:i');
+            $period_to_bold=$data->id;        
+            $message = '<div style="float:left">' . $message_image_closed_html . '</div>';
+            $message .= '<div style="float:left"><br/><br/>' . $message_time_now;
+            $message .= "<br/>" . t('We are closed at this time. ') . "<br/>" . t('We open at : ') . "<strong>" . $reopening_time . ".</strong></div><div style='clear:both;'></div>";
+            break;
+        } 
+        elseif ($timenow > $begin && $timenow < $end) {//into a period---------------------------          
+            $closing_time=format_date(strtotime($data->ending_time), 'custom', 'H:i');
+            $period_to_bold = $data->id;
+            $message = '<div style="float:left">' . $message_image_open_html . '</div>';
+            $message .= '<div ><br/><br/>' . $message_time_now;
+            $message .= '<br/>' . t('We are OPEN now. ') . '<br/>' . t('We close at : ') . '<strong>' . $closing_time . '</strong></div><div style="clear:both;"></div>';
+            break;
+        } 
+        elseif ($data->beginning_time > $data->ending_time) {// finishing after midnight ----------                                                    
+            //to manage the possibility of finishing after midnight we transform
+            // the ending time 01:45 into 0145 then 2400 + 0145 = 2545 before comparing           
+            $max_periods_of_the_day = db_query("SELECT MAX(ending_time) AS max FROM {shop_open_periods} WHERE day_num = :v1", array(':v1' => $data->day_num));
+            $data_max = $max_periods_of_the_day->fetch();
+            $max_ending_time = $data_max->max;
+            $end=format_date( $data->ending_time, 'custom', 'Hi') + 2400;
+            $begin=format_date( $data->beginning_time, 'custom', 'Hi');
+            $period_to_bold = $data->id;
+        }
+        if ($timenow > $end) {               //after period-------------------
+            $message = '<div style="float:left">' . $message_image_closed_html . '</div>';
+            $message .= '<div ><br/><br/>' . $message_time_now;
+            $message .= "<br/>" . t("We are closed at this time. ") . "</div><div style='clear:both;'></div>";
+        }
+    } //end while periods in today  
+    
+    //are we on holiday ?----------
+    $holiday_datas= db_query("SELECT a.* FROM {shop_holiday_periods} AS a WHERE activated = 1 ");
+    foreach ($holiday_datas as $holiday) {
+        if ($now > strtotime($holiday->beginning_datetime) && ($now < strtotime($holiday->ending_datetime))) {
+            //yes we are on holiday---------
+            // re-opening day ? We duplicate  the table for conveniently search the first line after the last holiday dey.
+            $ii = 0;
+            $double_table_days = array();
+            $query = db_select('shop_open_periods','a');
+            $query
+                ->condition('a.activated', 1 , '=')
+                ->condition('a.off', 0 , '=')
+                ->fields('a', array('id','activated','day_num','beginning_time','ending_time','off'))
+                ->orderBy ('day_num, beginning_time','ASC');
+            $period = $query->execute();
+            foreach($period as $periodss) {
+                $double_table_days[$ii]['id'] = $periodss->id;
+                $double_table_days[$ii]['activated'] = $periodss->activated;
+                $double_table_days[$ii]['day_num'] = $periodss->day_num;
+                $double_table_days[$ii]['beginning_time'] = $periodss->beginning_time;
+                $double_table_days[$ii]['ending_time'] = $periodss->ending_time;
+                $double_table_days[$ii]['off'] = $periodss->off;
+                $ii++;
+            }
+            $period = $query->execute();
+            foreach($period as $periodss) {
+                $double_table_days[$ii]['id'] = $periodss->id;
+                $double_table_days[$ii]['activated'] = $periodss->activated;
+                $double_table_days[$ii]['day_num'] = strval( intval($periodss->day_num) + 7);
+                $double_table_days[$ii]['beginning_time'] = $periodss->beginning_time;
+                $double_table_days[$ii]['ending_time'] = $periodss->ending_time;
+                $double_table_days[$ii]['off'] = $periodss->off;
+                $ii++;
+            }
+            $previous_day = -1;
+            $last_holy_day = format_date(strtotime($holiday->ending_datetime), 'custom', 'w');
+            foreach($double_table_days as $key=>$period_line) {                
+                if ($period_line['day_num'] > $last_holy_day) {
+                    $id_reopening_day = $period_line['id'];
+                    $reopening_time = format_date(strtotime($period_line['beginning_time']), 'custom', 'H:i');
+                    $days_between = $period_line['day_num']-$last_holy_day;
+                    $reopening_day = format_date(strtotime($holiday->ending_datetime) + (3600*24*$days_between), 'custom', 'l, F j, Y');
+                    break;
+                }       
+            }  
+            $period_to_bold = $id_reopening_day;
+            //  Holiday
+            $image_holiday_source = $base_url . '/' . drupal_get_path('module', 'businesshours') . '/images/holiday.png';
+            /*if ($view == 'block') {
+                $image_holiday_html = '<div style="max-width: 100%;height: auto;width:auto\9;text-align:center;border:0px"><img alt="" style="width:70%;height=auto; margin:auto;border:0px" src="' . $image_holiday_source . '" /></div>';      
+                $message = ' <div >' . $image_holiday_html . '</div>';
+                $message .= "<div style='clear:both;font-size:1.3em;text-align:center;'>" . t("We are actually in Holiday. ");
+                $message .= "<br/>" . t('We re-open : ') . "<br/><strong>" . $reopening_day . "</strong> at " . $reopening_time . " .</div>";           
+                $holiday_to_bold = $holiday->id;
+                $on_holiday=TRUE;
+            } else {            
+                $image_holiday_html = '<div style="max-width: 100%;height: auto;width:auto\9;text-align:center;margin: 10px; border:0px"><img alt="" style="width:70%;height=auto; border:0px" src="' . $image_holiday_source . '" /></div>';      
+                $message = ' <div style="float:left">' . $image_holiday_html . '</div>';
+                $message .= "<div style='font-size:1.3em;text-align:center;'><br/><br/>" . t("We are actually in Holiday. ");
+                $message .= "<br/>" . t('We re-open : ') . "<br/><strong>" . $reopening_day . "</strong> at " . $reopening_time . " .</div>";           
+                $holiday_to_bold = $holiday->id;
+                $on_holiday=TRUE;
+            }*/
+            break;  
+        }
+    }//end while holiday
+    return $period_to_bold;
+}    
