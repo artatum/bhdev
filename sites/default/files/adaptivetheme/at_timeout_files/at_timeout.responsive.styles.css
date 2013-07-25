@@ -1,0 +1,320 @@
+/*
+ * responsive.custom.css is for custom media queries that are not set via the
+ * theme settings, such as cascading media queries.
+ *
+ * By default all the other responsive stylesheets used in Adaptivetheme use a
+ * "stacking method", however cascading media queries use a waterfall method so
+ * you can leverage the cascade and inheritance for all browsers that support
+ * media queries.
+ *
+ * @SEE http://zomigi.com/blog/essential-considerations-for-crafting-quality-media-queries/#mq-overlap-stack
+ *
+ * NOTE: this file loads by default, to disable go to your theme settings and
+ * look under the "CSS" settings tab.
+ */
+
+/*
+ * Really small screens and up
+ */
+/* @media only screen and (min-width: 220px) {} */
+
+/*
+ * Smartphone sizes and up
+ */
+/* @media only screen and (min-width: 320px) {} */
+
+/*
+ * Smartphone sizes and down
+ */
+@media only screen and (max-width: 480px) {
+  /* 
+   * Float Region Blocks - custom media query CSS example:
+   * 
+   * Float regions blocks is an Extension you can enable in the appearance
+   * settings for your theme. This feature allows you to automatically float
+   * blocks in regions, you can switch it on and off depending on your
+   * requirements. For design purposes you many want to remove the floats for
+   * devices where the entire theme is just one column - for example small
+   * mobile phones. The following CSS is inside the custom media query:
+   *
+   *   @media only screen and (max-width: 480px){}
+   *
+   * This will target devices with a maximum width of 480px - most small phones.
+   * In these smaller screen sizes we can remove the float and widths so all
+   * blocks stack instead of displaying horizonally. The selector used is an
+   * "attribute selector" which will match on any float block class. Use your
+   * inspector or Firebug to get the classes from the page output if you need
+   * more granular control over block alignment and stacking.
+   */
+  .region[class*="float-blocks"] .block {
+    float: none;
+    width: 100%;
+  }
+}
+
+/*
+ * Tablet sizes and up
+ */
+/* @media only screen and (min-width: 768px) {} */
+
+/*
+ * Desktops/laptops and up
+ */
+/* @media only screen and (min-width: 1025px) {} */
+
+
+@media only screen and (max-width:320px) {
+/*
+ *   Important Information about this CSS File
+ *
+ * - Do not delete or rename this file, if you do not use it leave it blank (delete
+ *   everything) and the file will be skipped when you enable Production Mode in
+ *   the Global theme settings.
+ *
+ * - Read the _README file in this directory, it contains useful help and other information.
+ */
+
+header#header div#branding {
+  float: none;
+  margin: auto;
+  text-align: center; 
+}
+header#header div.region-header {
+  display: table;
+  float: none;
+  margin: 15px auto 0;
+  text-align: center;
+}
+header#header div.region-header .block {
+  clear: none;
+  display: inline;
+  margin: auto;
+  padding: 0 0 20px !important;
+  text-align: left;
+}
+header#header div.region-header .block-inner {
+  margin: 0 20px;
+}
+header#header div#logo,
+header#header h1#site-name,
+header#header h2#site-slogan {
+  float: none;
+  margin: 0;
+  padding: 0 0 6px;
+  text-align: center;
+}
+#menu-bar-wrapper,
+#menu-bar {
+  min-height: 3em;
+  height: auto;
+}
+#menu-bar {
+  padding: 0 2px;
+}
+#menu-bar .block {
+  clear: both;
+  float: none;
+}
+#menu-bar .menu-wrapper > ul,
+#menu-bar .menu-wrapper > ul > li {
+  display: block;
+  float: none;
+  margin: 0;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,0.5);
+}
+#menu-bar .menu-wrapper > ul,
+#menu-bar .menu-wrapper > ul > li.last {
+  border-bottom: none;
+}
+#menu-bar .menu-wrapper ul > li > a {
+  padding: 6px 10px 8px;
+  -moz-border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+  border-radius: 0 !important;
+}
+#menu-bar .sf-menu {
+  height: auto;
+  padding: 2px 0;
+}
+#menu-bar .menu-wrapper ul ul {
+  display: none !important;
+}
+.region-header .block {
+  overflow: hidden;
+}
+.article-title {
+  font-size: 1.5em;
+}
+
+}
+@media only screen and (min-width:321px) and (max-width:480px) {
+/*
+ *   Important Information about this CSS File
+ *
+ * - Do not delete or rename this file, if you do not use it leave it blank (delete
+ *   everything) and the file will be skipped when you enable Production Mode in
+ *   the Global theme settings.
+ *
+ * - Read the _README file in this directory, it contains useful help and other information.
+ */
+
+header#header div#branding {
+  float: none;
+  margin: auto;
+  text-align: center; 
+}
+header#header div.region-header {
+  display: table;
+  float: none;
+  margin: 15px auto 0;
+  text-align: center;
+}
+header#header div.region-header .block {
+  clear: none;
+  display: inline;
+  margin: auto;
+  padding: 0 0 20px !important;
+  text-align: left;
+}
+header#header div.region-header .block-inner {
+  margin: 0 20px;
+}
+header#header div#logo,
+header#header h1#site-name,
+header#header h2#site-slogan {
+  float: none;
+  margin: 0;
+  padding: 0 0 6px;
+  text-align: center;
+}
+#menu-bar-wrapper,
+#menu-bar {
+  min-height: 3em;
+  height: auto;
+}
+#menu-bar {
+  padding: 0 2px;
+}
+#menu-bar .block {
+  clear: both;
+  float: none;
+}
+#menu-bar .menu-wrapper > ul,
+#menu-bar .menu-wrapper > ul > li {
+  display: block;
+  float: none;
+  margin: 0;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,0.5);
+}
+#menu-bar .menu-wrapper > ul,
+#menu-bar .menu-wrapper > ul > li.last {
+  border-bottom: none;
+}
+#menu-bar .menu-wrapper ul > li > a {
+  padding: 6px 10px 8px;
+  -moz-border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+  border-radius: 0 !important;
+}
+#menu-bar .sf-menu {
+  height: auto;
+  padding: 2px 0;
+}
+#menu-bar .menu-wrapper ul ul {
+  display: none !important;
+}
+.region-header .block {
+  overflow: hidden;
+}
+.article-title {
+  font-size: 1.5em;
+}
+}
+@media only screen and (min-width:481px) and (max-width:768px) {
+/*
+ *   Important Information about this CSS File
+ *
+ * - Do not delete or rename this file, if you do not use it leave it blank (delete
+ *   everything) and the file will be skipped when you enable Production Mode in
+ *   the Global theme settings.
+ *
+ * - Read the _README file in this directory, it contains useful help and other information.
+ */
+
+header#header div#branding {
+  float: none;
+  margin: auto;
+  text-align: center; 
+}
+header#header div.region-header {
+  display: table;
+  float: none;
+  margin: 15px auto 0;
+  text-align: center;
+}
+header#header div.region-header .block {
+  clear: none;
+  display: inline;
+  margin: auto;
+  padding: 0 0 20px !important;
+  text-align: left;
+}
+header#header div.region-header .block-inner {
+  margin: 0 20px;
+}
+header#header div#logo,
+header#header h1#site-name,
+header#header h2#site-slogan {
+  float: none;
+  margin: 0;
+  padding: 0 0 6px;
+  text-align: center;
+}
+.hl-r #logo {
+  padding: 0 3px 7px 10px;
+}
+.hl-l #logo {
+  padding: 0 10px 7px 3px;
+}
+#site-name {
+  font-size: 1.8em;
+}
+
+}
+@media only screen and (min-width:769px) and (max-width:1024px) {
+/*
+ *   Important Information about this CSS File
+ *
+ * - Do not delete or rename this file, if you do not use it leave it blank (delete 
+ *   everything) and the file will be skipped when you enable Production Mode in
+ *   the Global theme settings.
+ *
+ * - Read the _README file in this directory, it contains useful help and other information.
+ */
+
+.hl-r #logo {
+  padding: 0 3px 7px 0;
+}
+.hl-l #logo {
+  padding: 0 0 7px 3px;
+}
+#site-name {
+  font-size: 2em;
+  white-space: pre;
+}
+
+}
+@media only screen and (min-width:1025px) {
+/*
+ *   Important Information about this CSS File
+ *
+ * - Do not delete or rename this file, if you do not use it leave it blank (delete
+ *   everything) and the file will be skipped when you enable Production Mode in
+ *   the Global theme settings.
+ *
+ * - Read the _README file in this directory, it contains useful help and other information.
+ */
+
+}
